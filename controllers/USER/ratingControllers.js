@@ -22,7 +22,7 @@ const hasPurchasedProduct = async (userId, productId) => {
 const addRating = async (req, res,next) => {
  try {
 
-    const userId = req.params.userId
+    const userId = req.user.id
     console.log(userId)
  
     const { productId, rating, comment } = req.body
@@ -166,7 +166,7 @@ const updateRating = async (req, res,next) => {
 
  try {
    
-    const userId = req.params.userId
+    const userId = req.user.id
     console.log(userId)
     const { rating, comment, ratingId } = req.body
     console.log(req.body)
@@ -205,8 +205,13 @@ const deleteRating = async (req, res, next) => {
   try {
 
     const ratingId = req.params.ratingId; // Assuming you're passing the ratingId in the request params
-    const userId = req.user.id; // ID of the currently logged-in user
-    const userRole = req.user.role; // Assuming `req.user.role` contains the user's role, e.g., 'user' or 'admin'
+    const userId = req.user.id; 
+    console.log(req.user);
+    
+    // ID of the currently logged-in user
+    const userRole = req.user.roles;
+    console.log(userRole)
+    // Assuming `req.user.role` contains the user's role, e.g., 'user' or 'admin'
 
     // Find and delete the rating in one step
     let rating;

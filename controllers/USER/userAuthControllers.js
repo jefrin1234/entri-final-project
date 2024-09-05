@@ -3,6 +3,7 @@ const User = require('../../model/userModel');
 const { createToken } = require('../../utils/createToken');
 const { cloudinaryInstance } = require("../../config/cloudinaryConfig");
 const { handleImageUpload } = require("../../utils/imageUpload");
+const { findByIdAndUpdate } = require('../../model/addressModel');
 
 
 const login = async (req, res, next) => {
@@ -105,7 +106,7 @@ const signup = async (req, res,next) => {
 
     
 
-    const newUser = new User({ name, email, password, password: hashedPassword, images: imageUrl }) // creating new user
+    const newUser = new User({ name, email, password: hashedPassword, image: imageUrl }) // creating new user
 
     await newUser.save() // saving newuser
 
@@ -129,7 +130,10 @@ const userProfile = async (req, res, next) => {
 
   try {
 
-    const { userId } = req.user.id
+
+    console.log("hited");
+    
+    const  userId  = req.user.id
 
     const user = await User.findById(userId)
 
@@ -169,7 +173,53 @@ const userLogout = async (req, res, next) => {
 };
 
  
+const checkUser = async (req, res, next) => {
+  try {
+      const { user } = req;
+      if (!user) {
+          res.status(401).json({ success: false, message: "user not autherized" });
+      }
+
+      res.json({ success: true, message: "user autherized" });
+  } catch (error) {
+      console.log(error);
+      res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
+  }
+};
+
+const updateUserRole = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+   
+    let user = await User.findOne({ _id: userId });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+        error: true,
+        success: false
+      });
+    }
+
+    if (!user.roles.includes('admin')) {
+      user.roles.push('admin');
+    }
+
+  
+    await user.save();
+
+    res.status(200).json({
+      message: "User role updated",
+      error: false,
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    
+    next(error)
+  }
+};
 
 
-
-module.exports = {login,signup, userProfile,userLogout}
+module.exports = {login,signup, userProfile,userLogout,checkUser,updateUserRole}

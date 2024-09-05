@@ -108,7 +108,7 @@ const getProductById =  async(req,res,next)=>{
 try{
 
   const productId = req.params.productId
-
+  console.log("hirr")
   const product = await Product.findById({_id:productId})
 
   if(!product){
