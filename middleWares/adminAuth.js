@@ -27,7 +27,7 @@ try{
   console.log(verifyToken)
 
   if(verifyToken.roles.includes("admin")){
-    req.user = verifyToken
+    req.admin = verifyToken
 
     next()
   }else{

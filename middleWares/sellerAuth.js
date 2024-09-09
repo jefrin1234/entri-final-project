@@ -18,7 +18,7 @@ try{
 
   const verifyToken = jwt.verify(token,process.env.JWT_SECRET_KEY)
 
-  console.log("+++++",verifyToken)
+  
 
   if(!verifyToken){
     return res.status(401).json({
@@ -35,7 +35,7 @@ try{
     success:true
    })
   }
-  req.user = verifyToken
+  req.seller = verifyToken
   next()
 }catch(error){
   next(error)

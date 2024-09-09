@@ -8,7 +8,6 @@ const addProduct = async(req,res,next)=>{
     
    console.log("hitted");
    
-      
     const {name,category,brand,price,sellingPrice,stock,description,sellerId} = req.body
    
     //  console.log(req.files)
@@ -139,11 +138,18 @@ try{
 
 const productByCategory = async(req,res)=>{
 
+
+
  const {category} = req.query
+
+ 
+
  console.log("hites")
+
+
  console.log(category)
 
- const products = await Product.find({category})
+ const products = await Product.find({category:category})
 
  if(!products){
   res.status(404).json({
