@@ -4,6 +4,7 @@ const sellerAuth = require('../../middleWares/sellerAuth')
 const { upload } = require('../../middleWares/multer')
 const adminAuth = require('../../middleWares/adminAuth')
 const {getSellerNotifications, deleteSellerNotification} = require('../../controllers/SELLER/sellerNotifications')
+const { stepOneValidation, stepTwoValidation } = require('../../controllers/SELLER/verificationStepController')
 
 
 
@@ -17,6 +18,9 @@ router.get('/profile',sellerAuth,sellerProfile)
 router.post('/check-seller',sellerAuth,checkSeller)
 router.get('/notifications',sellerAuth,getSellerNotifications)
 router.post('/delete-notification/:notificationId',sellerAuth,deleteSellerNotification)
+router.post('/verification-one',stepOneValidation)
+router.post('/verification-two',stepTwoValidation)
+
 
 
 

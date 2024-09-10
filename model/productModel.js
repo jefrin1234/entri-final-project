@@ -40,7 +40,8 @@ const productSchema = new mongoose.Schema({
   ratings:{
     type:mongoose.Schema.Types.ObjectId, 
    ref:'Rating'
-  }
+  },
+  deleted: { type: Boolean, default: false },
 },
 {
   timestamps:true

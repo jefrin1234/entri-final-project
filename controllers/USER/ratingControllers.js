@@ -80,7 +80,8 @@ const addRating = async (req, res,next) => {
 const getProductRatings = async (req, res,next) => {
   try {
     const productId = req.params.productId
-    const productRatings = await Rating.find({ productId })
+    const productRatings = await Rating.find({ productId,deleted: false
+    })
 
     if (!productRatings) {
       return res.status(404).json({
@@ -107,9 +108,10 @@ const getAllRatings = async (req, res,next) => {
 
   try {
     console.log("g=hiitesd")
-    const ratings = await Rating.find()
+    const ratings = await Rating.find({deleted: false
+    })
 
-    if (!ratings) {
+    if (!ratings || ratings.length != 0) {
       return res.status(404).json({
         message: "no ratings found",
         success: false,
@@ -136,7 +138,8 @@ const getRatingByUserId = async (req, res, next) => {
     console.log("///////", userId);
 
     // Use find method to search by userId
-    const ratings = await Rating.find({ userId });
+    const ratings = await Rating.find({ userId,deleted: false
+    });
     console.log("-==0-=", ratings);
 
     if (ratings.length === 0) {
@@ -218,10 +221,15 @@ const deleteRating = async (req, res, next) => {
 
     // If the user is an admin, allow them to delete any rating
     if (userRole.includes('admin')) {
-      rating = await Rating.findByIdAndDelete(ratingId);
+      rating = await Rating.findById(ratingId);
+      rating.deleted = true
+      await rating.save()
     } else {
       // If the user is not an admin, allow them to delete only their own rating
-      rating = await Rating.findOneAndDelete({ _id: ratingId, userId: userId });
+      rating = await Rating.findOne({ _id: ratingId, userId: userId });
+
+      rating.deleted = true
+      await rating.save()
     }
 
     // If no rating is found, return a 404 error

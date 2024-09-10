@@ -107,7 +107,7 @@ const login = async (req, res, next) => {
     res.status(200).json(
       {  message: "admin login successfull",
          success: true,
-         data:admin,
+         data:{_id:admin._id},
          });
 
 
@@ -128,7 +128,7 @@ const adminProfile = async(req, res, next)=>{
     const adminId = req.user.id
     const role   = req.user.role
 
-    const admin = await User.findById(adminId)
+    const admin = await User.findById(adminId).select("-password")
 
     if (!admin) {
       return res.status(404).json({

@@ -43,6 +43,7 @@ const orderSchema = new mongoose.Schema({
     enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Returned"],
     default: "Pending"
   },
+  deleted: { type: Boolean, default: false },
 
 },
 {

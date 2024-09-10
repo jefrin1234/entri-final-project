@@ -6,7 +6,8 @@ try {
   const sellerId = req.seller.id
   console.log("hiotted")
   console.log(sellerId,"iddddn")
-  const notifications = await Notification.find({sellerId})
+  const notifications = await Notification.find({sellerId,deleted: false
+  })
 
   console.log(notifications)
 
@@ -37,7 +38,7 @@ const deleteSellerNotification = async(req,res,next)=>{
 try {
   const notificationId = req.params.notificationId
 
-  const notification = await Notification.findByIdAndDelete(notificationId)
+  const notification = await Notification.findById(notificationId)
 
   if(!notification){
     return res.json({
@@ -46,6 +47,9 @@ try {
       success:false
     })
   }
+
+  notification.deleted = true
+  await notification.save()
 
   res.status(200).json({
     message:"Notification deleted",

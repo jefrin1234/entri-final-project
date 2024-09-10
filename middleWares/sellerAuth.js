@@ -28,7 +28,7 @@ try{
     })
   }
 
-  if(!verifyToken.roles.includes("admin") && !verifyToken.roles.includes("seller")){
+  if(!verifyToken.roles.includes("seller") ){
    return res.status(401).json({
     message:" permission denied",
     error:false,

@@ -13,16 +13,15 @@ const sellerSignup = async (req, res,next) => {
 
   try {
 
-    console.log("hited")
   
      //destructuring  name,email,password and profile picture from the  body
     const { name, email, password ,accountHolderName,accountNumber,bankName,ifsc,pan,city,state,postalCode,phone,gstinNumber,pickupLocation, businessName} = req.body  
 
-    req.file
+    console.log(req.body)
    
 
     //checking for all required fields .if name,email,and password not in the request body sending 404 error message
-    if (!name || !email || !password || !accountHolderName || !accountNumber || !bankName || !ifsc ||  !pan || !city || !state || !postalCode || !phone || !gstinNumber || !pickupLocation || ! businessName) {
+    if (!name || !email || !password || !accountHolderName || !accountNumber || !bankName || !ifsc ||  !pan || !city || !state || !postalCode || !phone || !gstinNumber || !pickupLocation || ! businessName ) {
       return res.status(400).json({
         message: "all fields are required",
         error: true,
@@ -31,23 +30,21 @@ const sellerSignup = async (req, res,next) => {
     }
 
     const existingUser = await Seller.findOne({
-      $or: [
-        { email },
-        { accountNumber },
-        { gstinNumber }
-      ]
+    accountNumber,deleted: false
     });
     //checking for existing user
 
     //if the user exists sending 404 error, conflict with the current state of the resource which is the email already exists
     if (existingUser) {
-      console.log("error ")
+     
       return res.status(409).json({
         message: "seller already exists",
         error: true,
         success: false
       })
     }
+
+  
 
     const saltRounds = 10; //determines the  complexity of generating a salt for hashing a password 
 
@@ -91,7 +88,7 @@ const sellerSignup = async (req, res,next) => {
     //sending status 201 for creating  new user successfull
     res.status(201).json({
       message: "seller account created waiting for varification",
-      data: newSeller,
+      data: {_id:newSeller._id},
       success: true,
       error: false
     })
@@ -152,7 +149,6 @@ const verifySeller = async(req,res)=>{
 
   res.status(200).json({
     message:"seller verification success",
-    data:seller,
     error:false,
     success:true
   })
@@ -176,7 +172,7 @@ const SellerLogin = async (req, res, next) => {
       })
     }
 
-    const existingUser = await Seller.findOne({ email })
+    const existingUser = await Seller.findOne({ email,deleted: false })
 
     
     
@@ -205,7 +201,7 @@ const SellerLogin = async (req, res, next) => {
     
 
     res.cookie("token", token);
-    res.status(200).json({ success: true,data:existingUser, message: "Seller login successfull" });
+    res.status(200).json({ success: true,data:{_id:existingUser._id}, message: "Seller login successfull" });
 
 
   } catch (error) {
@@ -225,9 +221,9 @@ const sellerProfile = async (req, res, next) => {
 
     const { sellerId } = req.user.id
 
-    const user = await Seller.findOne(sellerId)
+    const seller = await Seller.findOne(sellerId).select("-password")
 
-    if (!user) {
+    if (!seller) {
       return res.status(404).json({
         message: "user not found",
         success: false,
@@ -237,7 +233,7 @@ const sellerProfile = async (req, res, next) => {
 
     res.status(200).json({
       message:"seller details ",
-      data:user,
+      data:seller,
       success:true,
       error:false
     })

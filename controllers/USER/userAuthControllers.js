@@ -50,7 +50,7 @@ const login = async (req, res, next) => {
     
 
     res.cookie("token", token);
-    res.status(200).json({ success: true,data:existingUser, message: "user login successfull" });
+    res.status(200).json({ success: true,data:{_id:existingUser._id}, message: "user login successfull" });
 
 
   } catch (error) {
@@ -113,7 +113,7 @@ const signup = async (req, res,next) => {
     //sending status 201 for creating  new user successfull
     res.status(201).json({
       message: "user saved",
-      data: newUser,
+      data: {_id:newUser._id},
       success: true,
       error: false
     })
@@ -135,7 +135,7 @@ const userProfile = async (req, res, next) => {
     
     const  userId  = req.user.id
 
-    const user = await User.findById(userId)
+    const user = await User.findById(userId).select("-password")
 
     if (!user) {
       return res.status(404).json({

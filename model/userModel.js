@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema({
     type:[String],
     default:['user']
   },  
+  deleted: { type: Boolean, default: false },
 },
 {
   timestamps:true

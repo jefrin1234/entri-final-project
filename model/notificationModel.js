@@ -19,7 +19,8 @@ const notificationSchema = new mongoose.Schema({
   isRead:{
     type:Boolean,
     default:false
-  }
+  },
+  deleted: { type: Boolean, default: false },
 },{
   timestamps:true
 });

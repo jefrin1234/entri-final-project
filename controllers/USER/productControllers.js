@@ -74,7 +74,7 @@ const getAllProducts = async(req,res,next)=>{
   
   console.log("hitted")
 
-  const products = await Product.find({})
+  const products = await Product.find({deleted:false})
 
   if(!products || products.length === 0){
     return res.status(404).json({
@@ -149,7 +149,8 @@ const productByCategory = async(req,res)=>{
 
  console.log(category)
 
- const products = await Product.find({category:category})
+ const products = await Product.find({category:category,deleted: false
+ })
 
  if(!products){
   res.status(404).json({
@@ -208,7 +209,8 @@ try {
 
   console.log({category:category,name:name,brand:brand,})
 
-    const products = await Product.find({category:category,name:name,brand:brand,}).sort(sortings)
+    const products = await Product.find({category:category,name:name,brand:brand,deleted: false
+    }).sort(sortings)
 
   if(!products || products.length == 0){
     return res.status(404).json({

@@ -33,7 +33,7 @@ const sellerSchema = new mongoose.Schema({
     required: true
   },
   phone:{
-    type:String,
+    type:Number,
     required:true,
     unique:true
   },
@@ -77,7 +77,8 @@ const sellerSchema = new mongoose.Schema({
   verified:{
     type:String,
     default:false
-  }
+  },
+  deleted: { type: Boolean, default: false },
  
 },
 {

@@ -45,6 +45,7 @@ const addressSchema = new mongoose.Schema({
     enum: ['Residential', 'Business'],
     default: 'Residential'
     },
+    deleted: { type: Boolean, default: false },
 
 }, {
   timestamps: true
