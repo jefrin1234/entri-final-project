@@ -7,7 +7,7 @@ const { findByIdAndUpdate } = require('../../model/addressModel');
 
 
 const login = async (req, res, next) => {
-
+   console.log("hteref")
   try {
     const { email, password } = req.body
     // console.log(req.body);

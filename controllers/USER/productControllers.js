@@ -57,6 +57,7 @@ const addProduct = async(req,res,next)=>{
 
 
   }catch(error){
+    console.log("cddsfadscs")
     next(error)
   }
 
@@ -136,7 +137,7 @@ try{
 
 
 
-const productByCategory = async(req,res)=>{
+const productByCategory = async(req,res,next)=>{
 
 
 

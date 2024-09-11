@@ -79,11 +79,11 @@ const addRating = async (req, res,next) => {
 
 const getProductRatings = async (req, res,next) => {
   try {
-    const productId = req.params.productId
-    const productRatings = await Rating.find({ productId,deleted: false
+    const {productId} = req.body
+    const productRatings = await Rating.find({ productId
     })
 
-    if (!productRatings) {
+    if (!productRatings || productRatings.length === 0) {
       return res.status(404).json({
         message: "no one has rated this product",
         error: false,
@@ -99,7 +99,7 @@ const getProductRatings = async (req, res,next) => {
     })
 
   } catch (error) {
-    next()
+    next(error)
   }
 
 }
@@ -107,11 +107,11 @@ const getProductRatings = async (req, res,next) => {
 const getAllRatings = async (req, res,next) => {
 
   try {
+    console.log(req.user,"weww")
     console.log("g=hiitesd")
-    const ratings = await Rating.find({deleted: false
-    })
+    const ratings = await Rating.find({})
 
-    if (!ratings || ratings.length != 0) {
+    if (!ratings || ratings.length === 0) {
       return res.status(404).json({
         message: "no ratings found",
         success: false,
@@ -134,11 +134,11 @@ const getAllRatings = async (req, res,next) => {
 
 const getRatingByUserId = async (req, res, next) => {
   try {
-    const userId = req.params.userId // Getting userId from request parameters
+    const userId = req.user.id // Getting userId from request parameters
     console.log("///////", userId);
 
     // Use find method to search by userId
-    const ratings = await Rating.find({ userId,deleted: false
+    const ratings = await Rating.find({ userId
     });
     console.log("-==0-=", ratings);
 
@@ -206,8 +206,8 @@ const updateRating = async (req, res,next) => {
 
 const deleteRating = async (req, res, next) => {
   try {
-
-    const ratingId = req.params.ratingId; // Assuming you're passing the ratingId in the request params
+   console.log("hitdfs")
+    const {ratingId} = req.body; // Assuming you're passing the ratingId in the request params
     const userId = req.user.id; 
     console.log(req.user);
     

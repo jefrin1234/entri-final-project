@@ -17,7 +17,7 @@ const sellerSignup = async (req, res,next) => {
      //destructuring  name,email,password and profile picture from the  body
     const { name, email, password ,accountHolderName,accountNumber,bankName,ifsc,pan,city,state,postalCode,phone,gstinNumber,pickupLocation, businessName} = req.body  
 
-    console.log(req.body)
+    console.log(req.body,"222")
    
 
     //checking for all required fields .if name,email,and password not in the request body sending 404 error message
@@ -100,7 +100,7 @@ const sellerSignup = async (req, res,next) => {
 }
 
 
-const verifySeller = async(req,res)=>{
+const verifySeller = async(req,res,next)=>{
 
   const {sellerId} = req.body
   const adminId = req.admin.id
@@ -172,10 +172,8 @@ const SellerLogin = async (req, res, next) => {
       })
     }
 
-    const existingUser = await Seller.findOne({ email,deleted: false })
+    const existingUser = await Seller.findOne({ email })
 
-    
-    
 
     if (!existingUser) {
       return res.status(404).json({
