@@ -17,7 +17,6 @@ const sellerSignup = async (req, res,next) => {
      //destructuring  name,email,password and profile picture from the  body
     const { name, email, password ,accountHolderName,accountNumber,bankName,ifsc,pan,city,state,postalCode,phone,gstinNumber,pickupLocation, businessName} = req.body  
 
-    console.log(req.body,"222")
    
 
     //checking for all required fields .if name,email,and password not in the request body sending 404 error message
@@ -59,8 +58,6 @@ const sellerSignup = async (req, res,next) => {
       imageUrl = await handleImageUpload(req.file.path);
     }
 
-        console.log("image path++++",imageUrl)
-      
     
     
 
@@ -68,7 +65,7 @@ const sellerSignup = async (req, res,next) => {
 
     await newSeller.save() // saving newSeller
 
-    console.log("new seller -=--+-",newSeller)
+ 
 
    const admins = await Admin.find()
 
@@ -143,7 +140,7 @@ const verifySeller = async(req,res,next)=>{
     await transporter.sendMail(mailOptions);
     console.log('Verification email sent successfully.');
   } catch (error) {
-    console.error('Error sending verification email:', error);
+   next(error)
   }
 
 
@@ -162,7 +159,7 @@ const SellerLogin = async (req, res, next) => {
 
   try {
     const { email, password } = req.body
-     console.log(req.body);
+    
     
     if (!email || !password) {
       return res.status(400).json({
@@ -250,7 +247,7 @@ const sellerProfile = async (req, res, next) => {
 const checkSeller = async (req, res, next) => {
   try {
       const { seller } = req;
-      console.log(seller,"sekler")
+    
 
 
      
@@ -261,7 +258,7 @@ const checkSeller = async (req, res, next) => {
 
       res.json({ success: true, message: " autherization success",data:seller });
   } catch (error) {
-      console.log(error);
+    
      next(error)
   }
 };
@@ -273,7 +270,7 @@ const sellerLogout = async (req, res, next) => {
       res.clearCookie("token");
       res.json({ message: "seller logout success", success: true });
   } catch (error) {
-      console.log(error);
+    
       next(error)
   }
 };

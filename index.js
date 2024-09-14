@@ -16,7 +16,7 @@ app.use(cookieParser())//using cookieParser
 //accepting cross origin requests
 app.use(cors({
   credentials : true,//accepting cookies form cross origin requests
-  origin : true//accepting request from any origins
+  origin : true
 
 }))
 

@@ -12,10 +12,6 @@ const signup = async (req, res,next) => {
 
   try {
 
-    console.log("hitted")
-    // console.log(req.file)
-
-    
 
     const {  email, password } = req.body  //destructuring  name,email,password and profile picture from the  body
 
@@ -62,7 +58,7 @@ const login = async (req, res, next) => {
 
 
     const { email, password } = req.body
-     console.log("=='][][",req.body);
+   
     
     if (!email || !password) {
       return res.status(400).json({
@@ -74,7 +70,6 @@ const login = async (req, res, next) => {
 
     const admin = await Admin.findOne({ email })
 
-    console.log("admin",admin)
 
     if (!admin) {
       return res.status(404).json({
@@ -100,8 +95,6 @@ const login = async (req, res, next) => {
 
     const token =  createToken(admin._id,'admin')
 
-    console.log("tokennnn",token);
-    
 
     res.cookie("token", token);
     res.status(200).json(
@@ -123,8 +116,7 @@ const adminProfile = async(req, res, next)=>{
   try {
 
 
-    console.log("hited");
-    
+ 
     const adminId = req.user.id
     const role   = req.user.role
 
@@ -169,7 +161,7 @@ const logOut = async (req, res, next) => {
       res.clearCookie("token");
       res.json({ message: " logout success", success: true });
   } catch (error) {
-      console.log(error);
+     
       next(error)
   }
 };

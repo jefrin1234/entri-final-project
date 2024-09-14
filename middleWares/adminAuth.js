@@ -24,7 +24,7 @@ try{
     })
   }
 
-  console.log(verifyToken)
+
 
   if(verifyToken.roles.includes("admin")){
     req.admin = verifyToken

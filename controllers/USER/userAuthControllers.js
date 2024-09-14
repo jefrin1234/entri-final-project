@@ -7,7 +7,7 @@ const { findByIdAndUpdate } = require('../../model/addressModel');
 
 
 const login = async (req, res, next) => {
-   console.log("hteref")
+   
   try {
     const { email, password } = req.body
     // console.log(req.body);
@@ -46,7 +46,7 @@ const login = async (req, res, next) => {
 
     const token =  createToken(existingUser._id, existingUser.role)
 
-    console.log("tokennnn",token);
+  
     
 
     res.cookie("token", token);
@@ -66,9 +66,7 @@ const signup = async (req, res,next) => {
 
   try {
 
-    console.log("hitted")
-    // console.log(req.file)
-
+    
     let imageUrl;
 
     const { name, email, password } = req.body  //destructuring  name,email,password and profile picture from the  body
@@ -131,7 +129,6 @@ const userProfile = async (req, res, next) => {
   try {
 
 
-    console.log("hited");
     
     const  userId  = req.user.id
 
@@ -167,7 +164,7 @@ const userLogout = async (req, res, next) => {
       res.clearCookie("token");
       res.json({ message: "user logout success", success: true });
   } catch (error) {
-      console.log(error);
+    
       next(error)
   }
 };
@@ -182,7 +179,7 @@ const checkUser = async (req, res, next) => {
 
       res.json({ success: true, message: "user autherized" });
   } catch (error) {
-      console.log(error);
+     
       res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
   }
 };

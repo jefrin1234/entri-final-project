@@ -3,9 +3,9 @@ const Seller = require("../../model/sellerModel")
 const stepOneValidation = async (req, res, next) => {
   try {
 
-    console.log("hitted backe")
+   
     const { email } = req.body
-    console.log(email)
+   
 
     const existingSeller = await Seller.find({ email })
 
@@ -35,9 +35,9 @@ const stepTwoValidation = async (req, res,next) => {
 
   try {
 
-    console.log("hiteds")
+    
     const { pan, gstinNumber, phone } = req.body
-   console.log(req.body)
+
    if(!pan || !gstinNumber || !phone){
     return res.status(400).json({
       message:"All fields are required",
@@ -70,7 +70,7 @@ const stepTwoValidation = async (req, res,next) => {
         }
       });
     
-      console.log(existingFields,"escxusdis")
+    
 
       return res.status(409).json({
         message: "Some fields are already in use",

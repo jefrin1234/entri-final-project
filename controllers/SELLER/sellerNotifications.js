@@ -4,15 +4,14 @@ const getSellerNotifications = async(req,res,next)=>{
 
 try {
   const sellerId = req.seller.id
-  console.log("hiotted")
-  console.log(sellerId,"iddddn")
+
   const notifications = await Notification.find({sellerId,deleted: false
   })
 
-  console.log(notifications)
+  
 
   if( notifications.length === 0){
-    console.log("error ")
+   
     return res.status(200).json({
       message:"No notifications found",
       data:notifications,

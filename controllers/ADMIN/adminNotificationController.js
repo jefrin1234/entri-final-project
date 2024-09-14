@@ -4,7 +4,7 @@ const getAdminNotification = async (req, res, next) => {
   try {
     const adminId = req.admin.id;
 
-    console.log("admin ===",adminId)
+  
 
     // Assuming notifications are linked to the admin using receiverId
     const notifications = await Notification.find({ receiverId: adminId, deleted: false })

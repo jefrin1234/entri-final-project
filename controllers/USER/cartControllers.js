@@ -5,7 +5,7 @@ const addToCart = async (req, res, next) => {
   try {
     const { productId, price, quantity } = req.body
     const userId = req.user.id
-    // console.log(userId,req.body)
+   
 
     
 
@@ -20,7 +20,7 @@ const addToCart = async (req, res, next) => {
     let cart = await Cart.findOne({userId})
     let existingProduct = null
 
-    console.log(cart)
+
 
     if(cart){
     
@@ -155,7 +155,7 @@ const getCart = async (req, res, next) => {
 
   try {
     const userId = req.user.id
-    console.log(userId)
+   
 
     const cartData = await Cart.findOne({ userId })
 
@@ -190,15 +190,15 @@ const getCart = async (req, res, next) => {
 const updateCart = async(req,res,next)=>{
 try{
  
-  console.log("hitted")
+  
   const userId = req.user.id
   const {productId,quantity} = req.body
-  console.log("****",userId)
+ 
 
   //findin the cart of the user with the userId
   const cart = await Cart.findOne({userId}) 
 
-  console.log("carrrrrr",cart)
+  
 
   if(!cart){
 

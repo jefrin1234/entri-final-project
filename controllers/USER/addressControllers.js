@@ -3,13 +3,13 @@ const Address = require("../../model/addressModel")
 const addAddress = async(req,res,next)=>{
 
 try{
-console.log("hoted")
+
   const userId = req.user.id
-  console.log(userId)
+
 
   const {fullName,phoneNumber,emailAddress,streetAddress,city,state,postalCode,country,addressType} = req.body
 
-  console.log(req.body)
+
 
   if(!fullName || !phoneNumber || !emailAddress || !streetAddress || !city || !state || !postalCode || !addressType || !country){
 
@@ -136,9 +136,9 @@ const addressById = async(req,res,next)=>{
  try{
   
   const userId = req.user.id
- console.log(userId)
+ 
   const {addressId} = req.body
-  console.log(addressId)
+  
 
  
 

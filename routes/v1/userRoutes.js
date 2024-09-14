@@ -1,10 +1,10 @@
 const express = require('express')  
 const router = express.Router() 
 
-const { upload } = require('../../middleWares/multer')
 const { signup, login, userLogout, userProfile, checkUser, updateUserRole } = require('../../controllers/USER/userAuthControllers')
 const userAuth = require('../../middleWares/userAuth')
 const adminAuth = require('../../middleWares/adminAuth')
+const {upload} = require('../../middleWares/multer')
 
 
 

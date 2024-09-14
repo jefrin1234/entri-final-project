@@ -14,7 +14,7 @@ const hasPurchasedProduct = async (userId, productId) => {
 
     return order !== null;
   } catch (error) {
-    console.error("Error finding order:", error);
+   
     return false
   }
 };
@@ -23,7 +23,7 @@ const addRating = async (req, res,next) => {
  try {
 
     const userId = req.user.id
-    console.log(userId)
+  
  
     const { productId, rating, comment } = req.body
    
@@ -107,8 +107,7 @@ const getProductRatings = async (req, res,next) => {
 const getAllRatings = async (req, res,next) => {
 
   try {
-    console.log(req.user,"weww")
-    console.log("g=hiitesd")
+   
     const ratings = await Rating.find({})
 
     if (!ratings || ratings.length === 0) {
@@ -135,13 +134,12 @@ const getAllRatings = async (req, res,next) => {
 const getRatingByUserId = async (req, res, next) => {
   try {
     const userId = req.user.id // Getting userId from request parameters
-    console.log("///////", userId);
+ 
 
     // Use find method to search by userId
     const ratings = await Rating.find({ userId
     });
-    console.log("-==0-=", ratings);
-
+    
     if (ratings.length === 0) {
       return res.status(404).json({
         message: "Ratings not found",
@@ -170,9 +168,9 @@ const updateRating = async (req, res,next) => {
  try {
    
     const userId = req.user.id
-    console.log(userId)
+   
     const { rating, comment, ratingId } = req.body
-    console.log(req.body)
+  
 
     const findRating = await Rating.findOne({ _id:ratingId })
 
@@ -206,14 +204,14 @@ const updateRating = async (req, res,next) => {
 
 const deleteRating = async (req, res, next) => {
   try {
-   console.log("hitdfs")
+  
     const {ratingId} = req.body; // Assuming you're passing the ratingId in the request params
     const userId = req.user.id; 
-    console.log(req.user);
+
     
     // ID of the currently logged-in user
     const userRole = req.user.roles;
-    console.log(userRole)
+   
     // Assuming `req.user.role` contains the user's role, e.g., 'user' or 'admin'
 
     // Find and delete the rating in one step
