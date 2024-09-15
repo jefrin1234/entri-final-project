@@ -7,7 +7,7 @@ const { addRating, getProductRatings, getAllRatings, getRatingByUserId, updateRa
 const router = express.Router()
  
 router.post('/add-rating/',userAuth,addRating)
-router.get('/product',userAuth,getProductRatings)
+router.get('/product/:productId',getProductRatings)
 router.get('/all-ratings',adminAuth,getAllRatings)
 router.get('/user-ratings',userAuth,getRatingByUserId)
 router.patch('/update-rating',userAuth,updateRating)

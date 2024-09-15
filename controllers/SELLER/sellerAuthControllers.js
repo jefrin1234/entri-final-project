@@ -159,7 +159,8 @@ const SellerLogin = async (req, res, next) => {
 
   try {
     const { email, password } = req.body
-    
+     
+    console.log(password)
     
     if (!email || !password) {
       return res.status(400).json({
@@ -170,6 +171,8 @@ const SellerLogin = async (req, res, next) => {
     }
 
     const existingUser = await Seller.findOne({ email })
+
+   console.log(existingUser)
 
 
     if (!existingUser) {
@@ -182,8 +185,8 @@ const SellerLogin = async (req, res, next) => {
 
     const passwordCheck = bcrypt.compareSync(password, existingUser.password)
 
-    
-    if (!passwordCheck) {
+     console.log(passwordCheck,"pass==")
+    if ( !passwordCheck) {
       return res.json({
         message: "password doesnt match",
         error: true,
@@ -214,9 +217,14 @@ const sellerProfile = async (req, res, next) => {
 
   try {
 
-    const { sellerId } = req.user.id
+    console.log("prodfile hitted")
 
-    const seller = await Seller.findOne(sellerId).select("-password")
+    const  sellerId  = req.seller.id
+    console.log(sellerId)
+
+    const seller = await Seller.findById(sellerId).select("-password")
+
+    console.log(seller,"seller is ")
 
     if (!seller) {
       return res.status(404).json({

@@ -77,32 +77,51 @@ const addRating = async (req, res,next) => {
 
 }
 
-const getProductRatings = async (req, res,next) => {
+
+const getProductRatings = async (req, res, next) => {
   try {
-    const {productId} = req.body
-    const productRatings = await Rating.find({ productId
-    })
+    const { productId } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5; // Default limit of 5 items per page
+
+    if (!productId) {
+      return res.status(400).json({
+        message: "Bad request",
+        error: true,
+        success: false,
+      });
+    }
+
+    const totalRatings = await Rating.countDocuments({ productId }); // Total number of ratings
+    const productRatings = await Rating.find({ productId })
+      .populate({
+        path: 'userId',
+        select: '-password -email -image -role',
+      })
+      .skip((page - 1) * limit) // Pagination logic
+      .limit(limit);
 
     if (!productRatings || productRatings.length === 0) {
-      return res.status(404).json({
-        message: "no one has rated this product",
+      return res.status(200).json({
+        message: "No one has rated this product",
         error: false,
-        success: true
-      })
+        success: true,
+      });
     }
 
     res.status(200).json({
-      message: "product ratings ",
+      message: "Product ratings",
       data: productRatings,
-      success: false,
-      error: true
-    })
-
+      totalRatings, // Sending total number of ratings
+      success: true,
+      error: false,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
+};
 
-}
+
 
 const getAllRatings = async (req, res,next) => {
 

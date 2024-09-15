@@ -7,10 +7,10 @@ const addProduct = async (req, res, next) => {
 
   try {
 
-    const { name, category, brand, price, sellingPrice, stock, description } = req.body
+    const { name, category, brand, price, sellingPrice, stock, description,colour } = req.body
 
     
-    if (!name || !category || !price || !sellingPrice || !description || !stock || !brand) {
+    if (!name || !category || !price || !sellingPrice || !description || !stock || !brand || !colour) {
       return res.status(409).json({
         message: "all fields are required",
         error: true,
@@ -56,6 +56,7 @@ const addProduct = async (req, res, next) => {
         sellingPrice,
         stock,
         description,
+        colour
       })
 
    
@@ -81,42 +82,44 @@ const addProduct = async (req, res, next) => {
 
 
 
-
-
-
 const getAllProducts = async (req, res, next) => {
-
-
   try {
+    console.log("Hit the product API");
 
-   console.log("hited")
+    // Get the page and limit query params from the request, or set default values
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 6; // Default limit to 6 products per page
+
+    // Calculate how many products to skip based on current page
+    const skip = (page - 1) * limit;
 
     const products = await Product.find({ deleted: false })
+      .skip(skip) // Skip the products for previous pages
+      .limit(limit); // Limit the number of products per page
+
+    const totalProducts = await Product.countDocuments({ deleted: false }); // Get total product count
 
     if (!products || products.length === 0) {
       return res.status(404).json({
         message: "No products found",
         error: true,
         success: false
-      })
+      });
     }
-
-    
 
     res.status(200).json({
       message: "All products",
       data: products,
+      currentPage: page,
+      totalPages: Math.ceil(totalProducts / limit),
+      totalProducts,
       error: false,
       success: true
-    })
+    });
   } catch (error) {
-
-    next(error)
-
+    next(error);
   }
-
-
-}
+};
 
 
 
@@ -190,7 +193,7 @@ const productsByQueries = async (req, res, next) => {
 
   try {
 
-    const { category, name, price, brand } = req.query
+    const { category, name, price, brand,colour } = req.query
 
   
     let filterings = {}
@@ -204,6 +207,9 @@ const productsByQueries = async (req, res, next) => {
     }
     if (brand) {
       filterings.brand = new RegExp(brand, 'i');
+    }
+    if(colour){
+      filterings.colour = new RegExp(brand, 'i');
     }
 
     let sortings = {}
@@ -248,15 +254,16 @@ const productsByQueries = async (req, res, next) => {
 const updateProduct = async(req,res,next)=>{
 try {
   
+
    const sellerId = req.seller.id
    const productId = req.params.productId
   
  
-  const { name, category, brand, price, sellingPrice, stock, description, existingImages } = req.body;
+  const { name, category, brand, price, sellingPrice, stock, description, existingImages,colour } = req.body;
 
-  
+  console.log(colour)
 
-   if(!name || !category || !price || !sellingPrice || !description || !stock || !brand){
+   if(!name || !category || !price || !sellingPrice || !description || !stock || !brand || !colour){
     return res.status(409).json({
       message:"All fields are required",
       error:true,
@@ -302,6 +309,7 @@ try {
     sellingPrice,
     stock,
     description,
+    colour,
     images: imageUrls, 
   } 
 
