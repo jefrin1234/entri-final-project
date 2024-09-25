@@ -1,7 +1,7 @@
 
 const bcrypt = require('bcrypt');
 const User = require('../../model/userModel');
-const { createToken } = require('../../utils/createToken');
+const {  createAdminToken } = require('../../utils/createToken');
 const Admin = require('../../model/adminModel');
 
 
@@ -54,11 +54,8 @@ const signup = async (req, res,next) => {
 const login = async (req, res, next) => {
 
   try {
-   
-
-
     const { email, password } = req.body
-   
+     
     
     if (!email || !password) {
       return res.status(400).json({
@@ -70,10 +67,11 @@ const login = async (req, res, next) => {
 
     const admin = await Admin.findOne({ email })
 
+ 
 
     if (!admin) {
       return res.status(404).json({
-        message: "couldnt find admin account",
+        message: "admin not found",
         error: true,
         success: true
       })
@@ -82,33 +80,31 @@ const login = async (req, res, next) => {
     const passwordCheck = bcrypt.compareSync(password, admin.password)
 
     
-    if (!passwordCheck) {
-      return res.status(401).json({
-        message: "user not authorized",
+    if ( !passwordCheck) {
+      return res.json({
+        message: "password doesnt match",
         error: true,
         success: false
       })
     }
 
 
+
+    const adminToken =  createAdminToken(admin._id, 'admin')
+
     
 
-    const token =  createToken(admin._id,'admin')
-
-
-    res.cookie("token", token);
-    res.status(200).json(
-      {  message: "admin login successfull",
-         success: true,
-         data:{_id:admin._id},
-         });
+    res.cookie("adminToken",adminToken);
+    res.status(200).json({ success: true,data:{id:admin._id,roles:admin.roles}, message: " login successfull" });
 
 
   } catch (error) {
     next(error)
   }
 
+
 }
+
 
   
 const adminProfile = async(req, res, next)=>{
@@ -158,7 +154,7 @@ const adminProfile = async(req, res, next)=>{
 
 const logOut = async (req, res, next) => {
   try {
-      res.clearCookie("token");
+      res.clearCookie("adminToken");
       res.json({ message: " logout success", success: true });
   } catch (error) {
      
@@ -166,11 +162,32 @@ const logOut = async (req, res, next) => {
   }
 };
 
+
+
+
+ 
+const checkAdmin = async (req, res, next) => {
+  try {
+    console.log("her is ")
+      const { admin } = req;
+      if (!admin) {
+          res.status(401).json({ success: false, message: "user not autherized" });
+      }
+
+      res.json({ success: true, message: "user autherized",data:admin });
+  } catch (error) {
+     
+      res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
+  }
+};
+
+
+
  
 
 
 
 
-module.exports = {login,logOut,adminProfile,signup}
+module.exports = {login,logOut,adminProfile,signup,checkAdmin}
 
 

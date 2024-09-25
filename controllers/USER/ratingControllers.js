@@ -9,7 +9,8 @@ const hasPurchasedProduct = async (userId, productId) => {
   try {
     const order = await Order.findOne({
       userId: userId,
-      "items.productId": productId
+      "items.productId": productId,
+      paymentStatus:'paid'
     })
 
     return order !== null;
@@ -19,63 +20,53 @@ const hasPurchasedProduct = async (userId, productId) => {
   }
 };
 
-const addRating = async (req, res,next) => {
- try {
+const addRating = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { productId, rating, comment } = req.body;
 
-    const userId = req.user.id
-  
- 
-    const { productId, rating, comment } = req.body
-   
-
-
+    console.log(productId, rating, comment,"giiiii")
 
     if (!productId || !rating || !comment) {
       return res.status(400).json({
-        message: "all fields are required",
+        message: "All fields are required",
         error: true,
-        success: false
-      })
+        success: false,
+      });
     }
 
-    // const purchased = await hasPurchasedProduct(userId, productId);
-    // if (!purchased) {
-    //   return res.status(403).json({
-    //     message: "You must purchase the product before rating",
-    //     error: true,
-    //     success: false
-    //   });
-    // }
+    const purchased = await hasPurchasedProduct(userId, productId);
+    if (!purchased) {
+      return res.status(403).json({
+        message: "You must purchase the product before rating",
+        error: true,
+        success: false,
+      });
+    }
 
-
-    const existingRating = await Rating.findOne({ userId, productId })
+    const existingRating = await Rating.findOne({ userId, productId });
 
     if (existingRating) {
       return res.status(400).json({
-        message: "cannot add more than one rating to  a product",
+        message: "You cannot add more than one rating for a product",
         error: true,
-        success: false
-      })
+        success: false,
+      });
     }
 
-
-    const newRating = new Rating({userId, productId, rating, comment,  })
-
-    await newRating.save()
-
+    const newRating = new Rating({ userId, productId, rating, comment });
+    await newRating.save();
+                         
     res.status(201).json({
-      message: "rating added",
+      message: "Rating added",
       data: newRating,
       error: false,
-      success: true
-    })
-
+      success: true,
+    });
   } catch (error) {
-    next()
+    next(error);
   }
-
-
-}
+};
 
 
 const getProductRatings = async (req, res, next) => {

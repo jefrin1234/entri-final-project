@@ -45,6 +45,10 @@ const productSchema = new mongoose.Schema({
     type:mongoose.Schema.Types.ObjectId, 
    ref:'Rating'
   },
+  verified:{
+    type:Boolean,
+    default:false
+  },
   deleted: { type: Boolean, default: false },
 },
 {

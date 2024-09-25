@@ -5,7 +5,7 @@ const getAdminNotification = async (req, res, next) => {
     const adminId = req.admin.id;
 
   
-
+    console.log(adminId)
     // Assuming notifications are linked to the admin using receiverId
     const notifications = await Notification.find({ receiverId: adminId, deleted: false })
 
@@ -16,6 +16,7 @@ const getAdminNotification = async (req, res, next) => {
         error: true,
       });
     }
+
 
     res.status(200).json({
       message: "Admin notifications",
@@ -28,4 +29,60 @@ const getAdminNotification = async (req, res, next) => {
   }
 };
 
-module.exports = getAdminNotification;
+
+
+const updateNotification = async (req, res) => {
+  try {
+    console.log("her iam coming")
+    const notificationId = req.params.notificationId;
+    const newData = req.body;
+
+    // Find and update the notification in one step
+    const updatedNotification = await Notification.findByIdAndUpdate(notificationId, newData, { new: true });
+
+    if (!updatedNotification) {
+      return res.status(404).json({
+        message: "Notification not found",
+        error: true,
+        success: false,
+      });
+    }
+
+    res.status(200).json({
+      message: "Notification updated",
+      error: false,
+      success: true,
+      data: updatedNotification,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error updating notification",
+      success: false,
+      error: true,
+    });
+  }
+};
+
+
+const deleteNotification = async(req,res)=>{
+  try {
+    const { id } = req.params;
+
+    
+    const notification = await Notification.findById(id);
+    if (!notification) {
+      return res.status(404).json({ success: false, message: 'Notification not found' });
+    }
+
+   
+    await Notification.findByIdAndDelete(id);
+
+    return res.status(200).json({ success: true, message: 'Notification deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting notification:', error);
+    return res.status(500).json({ success: false, message: 'Server error' });
+  }
+}
+
+
+module.exports = {getAdminNotification,updateNotification,deleteNotification}

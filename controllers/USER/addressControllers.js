@@ -7,12 +7,12 @@ try{
   const userId = req.user.id
 
 
-  const {fullName,phoneNumber,emailAddress,streetAddress,city,state,postalCode,country,addressType} = req.body
+  const {fullName,phoneNumber,emailAddress,streetAddress,city,state,postalCode} = req.body
 
+  console.log(req.body)
 
-
-  if(!fullName || !phoneNumber || !emailAddress || !streetAddress || !city || !state || !postalCode || !addressType || !country){
-
+  if(!fullName || !phoneNumber || !emailAddress || !streetAddress || !city || !state || !postalCode ){
+   console.log("error")
     return res.status(409).json({
       message:"All fields are required",
       error:true,
@@ -21,24 +21,15 @@ try{
 
   }
 
-  const existingAddress = await Address.find({userId})
+ 
+
+   const newAddress = new Address({userId,fullName,phoneNumber,emailAddress,streetAddress,city,state,postalCode})
 
 
-  const duplicate = existingAddress.find(address =>
-    address.emailAddress === emailAddress || address.phoneNumber === phoneNumber
-  );
 
-  if (duplicate) {
-    return res.status(409).json({
-      message: "Cannot add more than one address with the same email or phone number",
-      error: true,
-      success: false
-    });
-  }
+    await newAddress.save()
 
-  const newAddress = new Address({userId,fullName,phoneNumber,emailAddress,streetAddress,city,state,postalCode,country,addressType})
-
-  await newAddress.save()
+    console.log(newAddress,"saved")
 
   res.status(201).json({
     message:"new address added",
@@ -62,7 +53,7 @@ try{
 const deleteAddress = async(req,res,next)=>{
 
 try{
-
+ console.log("iamm ")
   const userId = req.user.id
   
   const {addressId} = req.body
@@ -104,9 +95,11 @@ const getAddress = async(req,res,next)=>{
 
 try{
   const userId = req.user.id
-
+  console.log("lskfnsa",userId)
 
   const address = await Address.find({userId})
+
+  console.log(address)
 
   if(!address || address.length === 0){
     return res.status(404).json({
@@ -115,6 +108,8 @@ try{
       success:true
     })
   }
+
+  
 
   res.status(200).json({
     message:"user address fetched",

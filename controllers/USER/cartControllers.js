@@ -6,7 +6,7 @@ const addToCart = async (req, res, next) => {
     const { productId, price, quantity } = req.body
     const userId = req.user.id
    
-
+  console.log(req.body,userId)
     
 
     if (!productId || !price || !quantity) {
@@ -27,7 +27,7 @@ const addToCart = async (req, res, next) => {
        existingProduct = cart.items.find(item => item.productId.toString() === productId);
 
        if (existingProduct) {
-        return res.status(401).json({
+        return res.status(409).json({
           message: "Item already exists in the cart",
           error: true,
           success: false,
@@ -53,6 +53,8 @@ const addToCart = async (req, res, next) => {
       await cart.save();
 
     }
+
+    console.log(cart)
 
     res.status(201).json({
       message: "Product added to the cart",
@@ -100,64 +102,82 @@ res.status(200).json({
 }
 
 
-
-
 const deleteCart = async (req, res, next) => {
-  try {
-    const userId = req.user.id
-    const { productId } = req.body
 
+  try {
+
+    const userId = req.user.id;
+
+    const { productId } = req.params;
+
+    console.log("++++",productId)
+
+    // Ensure productId is provided
     if (!productId) {
       return res.status(409).json({
-        message: "product id  is required",
+        message: "Product ID is required",
         success: false,
-        error: true
-      })
+        error: true,
+      });
     }
 
-    const cart = await Cart.findOne({ userId })
+    // Find the cart for the user
+    const cart = await Cart.findOne({ userId });
 
     if (!cart) {
       return res.status(404).json({
-        message: "cart not found",
+        message: "Cart not found",
         success: false,
-        error: true
-      })
+        error: true,
+      });
     }
 
+    //  console.log(cart)
 
+  
+    const updatedItems = cart.items.filter(item => !item.productId.equals(productId));
 
-    const updateCart = cart.items.filter(item => !item.productId.equals(productId))
+    console.log(updatedItems,"1233")
 
-    cart.items = updateCart
+    if (updatedItems.length === cart.items.length) {
+      return res.status(404).json({
+        message: "Product not found in cart",
+        success: false,
+        error: true,
+      });
+    }
 
-    await cart.calculateTotalPrice();
+    // Update the cart items and recalculate total price
+    cart.items = updatedItems;
+    await cart.calculateTotalPrice(); // Ensure this function exists and works properly
 
-    await cart.save()
+    // Save the updated cart
+    await cart.save();
 
     res.status(200).json({
-      message: "product removed from the cart",
+      message: "Product removed from the cart",
       data: cart,
       success: true,
-      error: false
-    })
-
+      error: false,
+    });
   } catch (error) {
-    next(error)
+    next(error);
   }
+};
 
-
-}
 
  
 
 const getCart = async (req, res, next) => {
 
   try {
+ 
     const userId = req.user.id
-   
+    
+    
 
-    const cartData = await Cart.findOne({ userId })
+    const cartData = await Cart.findOne({ userId }).populate('items.productId')
+
 
     if (!cartData) {
       return res.status(404).json({
@@ -190,17 +210,19 @@ const getCart = async (req, res, next) => {
 const updateCart = async(req,res,next)=>{
 try{
  
-  
+  console.log("home")
+
   const userId = req.user.id
+
   const {productId,quantity} = req.body
- 
+
 
   //findin the cart of the user with the userId
   const cart = await Cart.findOne({userId}) 
 
-  
+   console.log(cart)
 
-  if(!cart){
+   if(!cart){
 
     return res.status(404).json({
       message:"cart not found",
@@ -211,7 +233,7 @@ try{
 
   //  finding the productId from the cart that need to be updated. below code checks if the productId received from the frontend matches the productId that is in the cart .if it is true that index of the item will be stored in the itemIndex variable
   
-  const itemIndex = cart.items.findIndex(item => item.productId.toString() === productId) 
+   const itemIndex = cart.items.findIndex(item => item.productId.toString() === productId) 
 
   //findIndex return -1 if no items satifies the condition if it is -1 then that means no product in the cart which matches the productId from the fronend
   if (itemIndex === -1) {
@@ -222,11 +244,11 @@ try{
     });
   }
 
-  cart.items[itemIndex].quantity = quantity
+   cart.items[itemIndex].quantity = quantity
 
-  cart.calculateTotalPrice();
+   cart.calculateTotalPrice();
 
-  await cart.save()
+   await cart.save()
   
 
   res.status(200).json({

@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('../../model/userModel');
-const { createToken } = require('../../utils/createToken');
+const {createSellerToken } = require('../../utils/createToken');
 const Seller = require('../../model/sellerModel');
 const  Admin = require('../../model/adminModel');
 const { handleImageUpload } = require('../../utils/imageUpload');
@@ -16,10 +16,11 @@ const sellerSignup = async (req, res,next) => {
   
      //destructuring  name,email,password and profile picture from the  body
     const { name, email, password ,accountHolderName,accountNumber,bankName,ifsc,pan,city,state,postalCode,phone,gstinNumber,pickupLocation, businessName} = req.body  
-
    
 
-    //checking for all required fields .if name,email,and password not in the request body sending 404 error message
+   
+  
+  //  checking for all required fields .if name,email,and password not in the request body sending 404 error message
     if (!name || !email || !password || !accountHolderName || !accountNumber || !bankName || !ifsc ||  !pan || !city || !state || !postalCode || !phone || !gstinNumber || !pickupLocation || ! businessName ) {
       return res.status(400).json({
         message: "all fields are required",
@@ -33,7 +34,9 @@ const sellerSignup = async (req, res,next) => {
     });
     //checking for existing user
 
-    //if the user exists sending 404 error, conflict with the current state of the resource which is the email already exists
+   
+   
+   // if the user exists sending 404 error, conflict with the current state of the resource which is the email already exists
     if (existingUser) {
      
       return res.status(409).json({
@@ -45,27 +48,32 @@ const sellerSignup = async (req, res,next) => {
 
   
 
-    const saltRounds = 10; //determines the  complexity of generating a salt for hashing a password 
+     const saltRounds = 10; //determines the  complexity of generating a salt for hashing a password 
 
 
    
-    const hashedPassword = bcrypt.hashSync(password, saltRounds) // hashing the password
+     const hashedPassword = bcrypt.hashSync(password, saltRounds) // hashing the password
 
   
-    let imageUrl;
+     let imageUrl;
    
     if (req.file) {
       imageUrl = await handleImageUpload(req.file.path);
     }
 
     
-    
 
-    const newSeller = new Seller({ name, email, password: hashedPassword,accountHolderName,accountNumber,bankName,ifsc,registrationCetificate:imageUrl,pan,city,state,postalCode,phone,gstinNumber,pickupLocation, businessName}) // creating new user
+
+     const newSeller = new Seller({ name, email, password: hashedPassword,accountHolderName,accountNumber,bankName,ifsc,registrationCetificate:imageUrl,pan,city,state,postalCode,phone,gstinNumber,pickupLocation, businessName}) // creating new user
+
 
     await newSeller.save() // saving newSeller
+   
+    const sellerData = newSeller.toObject();
+    delete sellerData.password; // Removing the password field
+    
 
- 
+
 
    const admins = await Admin.find()
 
@@ -74,7 +82,7 @@ const sellerSignup = async (req, res,next) => {
         senderId:newSeller._id,
         receiverId:admin._id,
         message:"Seller verification request",
-        data:newSeller
+        data:sellerData
       })
       await notification.save()
    }
@@ -82,48 +90,53 @@ const sellerSignup = async (req, res,next) => {
    
    
 
-    //sending status 201 for creating  new user successfull
     res.status(201).json({
       message: "seller account created waiting for varification",
-      data: {_id:newSeller._id},
+      data: {_id:sellerData._id},
       success: true,
       error: false
     })
 
   } catch (error) {
-    next(error) // sending error to the next function by using next()
+    next(error)
   }
 
 }
 
 
-const verifySeller = async(req,res,next)=>{
+const verifySeller = async (req, res, next) => {
+  const { sellerId } = req.body;
+  const adminId = req.admin.id;
+ 
+  let seller;
 
-  const {sellerId} = req.body
-  const adminId = req.admin.id
+  try {
+    seller = await Seller.findById(sellerId);
 
-  let seller = await Seller.findById(sellerId)
+    if (!seller) {
+      return res.status(404).json({
+        message: "Seller not found",
+        error: true,
+        success: false,
+      });
+    }
 
-  if(!seller){
-    return res.status(404).json({
-      message:"seller not found",
-      error:true,
-      success:false
-    })
+    seller.verified = true;
+    await seller.save();
+  } catch (error) {
+    return next(error); // Pass the error to the error-handling middleware
   }
 
-  seller.verified = true
-
-  await seller.save()
-
+  // Setup nodemailer transporter
   const transporter = nodemailer.createTransport({
     service: 'gmail', // or another email service provider
     auth: {
       user: 'jefrinjames212@gmail.com', // your email
-      pass: 'saln jyjr kwfn blrl' // your email password or an application-specific password
-    }
+      pass: 'saln jyjr kwfn blrl', // your email password or an application-specific password
+    },
   });
 
+  // Email details
   const mailOptions = {
     from: 'jefrinjames212@gmail.com',
     to: seller.email,
@@ -131,28 +144,29 @@ const verifySeller = async(req,res,next)=>{
     html: `
       <h1>Congratulations!</h1>
       <p>Your seller account has been successfully verified.</p>
-      <p><a href=http://localhost:5173/login>Click here to log in to your account</a></p>
+      <p><a href="http://localhost:5173/login">Click here to log in to your account</a></p>
       <p>If you did not request this verification, please contact support.</p>
-    `
+    `,
   };
 
+  // Try sending the email
   try {
     await transporter.sendMail(mailOptions);
-    console.log('Verification email sent successfully.');
+   
   } catch (error) {
-   next(error)
+    return next(error); // If email sending fails, pass the error to the next middleware and exit
   }
 
+  const sellerData = seller.toObject();
+  delete sellerData.password; // Removing the password 
 
-  res.status(200).json({
-    message:"seller verification success",
-    error:false,
-    success:true
-  })
-
-
-
-}
+  // If everything works, send the success response
+  return res.status(200).json({
+    message: "Seller verification success",
+    error: false,
+    success: true,
+  });
+};
 
 
 const SellerLogin = async (req, res, next) => {
@@ -160,7 +174,7 @@ const SellerLogin = async (req, res, next) => {
   try {
     const { email, password } = req.body
      
-    console.log(password)
+    
     
     if (!email || !password) {
       return res.status(400).json({
@@ -172,7 +186,7 @@ const SellerLogin = async (req, res, next) => {
 
     const existingUser = await Seller.findOne({ email })
 
-   console.log(existingUser)
+
 
 
     if (!existingUser) {
@@ -185,7 +199,7 @@ const SellerLogin = async (req, res, next) => {
 
     const passwordCheck = bcrypt.compareSync(password, existingUser.password)
 
-     console.log(passwordCheck,"pass==")
+  
     if ( !passwordCheck) {
       return res.json({
         message: "password doesnt match",
@@ -194,12 +208,13 @@ const SellerLogin = async (req, res, next) => {
       })
     }
 
-    const token =  createToken(existingUser._id, 'seller')
+    const sellerToken = createSellerToken(existingUser._id, "seller");
 
-    
 
-    res.cookie("token", token);
-    res.status(200).json({ success: true,data:{_id:existingUser._id}, message: "Seller login successfull" });
+  
+
+    res.cookie("sellerToken", sellerToken);
+    res.status(200).json({ success: true,data:{id:existingUser._id,roles:existingUser.roles}, message: "Seller login successfull" });
 
 
   } catch (error) {
@@ -217,14 +232,11 @@ const sellerProfile = async (req, res, next) => {
 
   try {
 
-    console.log("prodfile hitted")
-
-    const  sellerId  = req.seller.id
-    console.log(sellerId)
+    const sellerId = req.seller?.id || req.params.sellerId 
 
     const seller = await Seller.findById(sellerId).select("-password")
 
-    console.log(seller,"seller is ")
+    
 
     if (!seller) {
       return res.status(404).json({
@@ -275,7 +287,7 @@ const checkSeller = async (req, res, next) => {
 
 const sellerLogout = async (req, res, next) => {
   try {
-      res.clearCookie("token");
+      res.clearCookie("sellerToken");
       res.json({ message: "seller logout success", success: true });
   } catch (error) {
     

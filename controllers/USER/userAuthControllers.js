@@ -1,8 +1,8 @@
 const bcrypt = require('bcrypt');
 const User = require('../../model/userModel');
-const { createToken } = require('../../utils/createToken');
-const { cloudinaryInstance } = require("../../config/cloudinaryConfig");
-const { handleImageUpload } = require("../../utils/imageUpload");
+const { createToken, createUserToken } = require('../../utils/createToken');
+
+
 const { findByIdAndUpdate } = require('../../model/addressModel');
 
 
@@ -44,12 +44,12 @@ const login = async (req, res, next) => {
       })
     }
 
-    const token =  createToken(existingUser._id, existingUser.role)
+    const token =  createUserToken(existingUser._id, existingUser.role)
 
   
     
 
-    res.cookie("token", token);
+    res.cookie("token",token);
     res.status(200).json({ success: true,data:{_id:existingUser._id}, message: "user login successfull" });
 
 
@@ -67,8 +67,6 @@ const signup = async (req, res,next) => {
   try {
 
     
-    let imageUrl;
-
     const { name, email, password } = req.body  //destructuring  name,email,password and profile picture from the  body
 
     //checking for all required fields .if name,email,and password not in the request body sending 404 error message
@@ -97,14 +95,10 @@ const signup = async (req, res,next) => {
    
     const hashedPassword = bcrypt.hashSync(password, saltRounds) // hashing the password
 
-    //if the file from the front-end is true then calling the handleImageUpload   function and sending the path that is received from the multer to the function
-    if (req.file) {
-      imageUrl = await handleImageUpload(req.file.path);
-    }
-
+  
     
 
-    const newUser = new User({ name, email, password: hashedPassword, image: imageUrl }) // creating new user
+    const newUser = new User({ name, email, password: hashedPassword }) // creating new user
 
     await newUser.save() // saving newuser
 
@@ -161,8 +155,9 @@ const userProfile = async (req, res, next) => {
 
 const userLogout = async (req, res, next) => {
   try {
+    console.log("going")
       res.clearCookie("token");
-      res.json({ message: "user logout success", success: true });
+      res.status(200).json({ message: "user logout success", success: true,error:false });
   } catch (error) {
     
       next(error)
@@ -177,7 +172,7 @@ const checkUser = async (req, res, next) => {
           res.status(401).json({ success: false, message: "user not autherized" });
       }
 
-      res.json({ success: true, message: "user autherized" });
+      res.json({ success: true, message: "user autherized",data:user });
   } catch (error) {
      
       res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
@@ -219,4 +214,64 @@ const updateUserRole = async (req, res) => {
 };
 
 
-module.exports = {login,signup, userProfile,userLogout,checkUser,updateUserRole}
+const passwordChange = async(req,res,next)=>{
+  const { currentPassword, newPassword } = req.body;
+  console.log(currentPassword,newPassword)
+  const userId = req.user.id; // Assuming you're using authentication middleware
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    console.log(user)
+    // Check if the current password is correct
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update the user's password
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ success: true, message: 'Password updated successfully' });
+  } catch (err) {
+    console.error('Error updating password:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+}
+
+
+const getAllUsers =  async(req,res,next)=>{
+
+   try {
+
+    const allUsers = await User.find()
+
+    if(!allUsers){
+      return res.status(401).status({
+        message:"no users found",
+        error:false,
+        success:true
+      })
+    }
+
+    res.status(200).json({
+      message:"All users",
+      error:false,
+      success:true,
+      data:allUsers
+    })
+   } catch (error) {
+    next(error)
+   }
+}
+
+
+module.exports = {login,signup, userProfile,userLogout,checkUser,updateUserRole,passwordChange,getAllUsers}

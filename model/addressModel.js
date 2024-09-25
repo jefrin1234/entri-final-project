@@ -17,7 +17,8 @@ const addressSchema = new mongoose.Schema({
   },
   emailAddress: {
     type: String,
-    required:true
+    required:true,
+    unique:false
   },
     streetAddress: {
       type: String,
@@ -36,15 +37,11 @@ const addressSchema = new mongoose.Schema({
       type: String,
       required: true
     },
-    country: {
-      type: String,
-      required: true
+    default:{
+      type:Boolean,
+
     },
-    addressType: {
-    type: String,
-    enum: ['Residential', 'Business'],
-    default: 'Residential'
-    },
+   
     deleted: { type: Boolean, default: false },
 
 }, {
