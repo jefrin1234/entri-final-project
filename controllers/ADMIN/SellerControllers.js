@@ -1,6 +1,4 @@
 
-const { findByIdAndDelete } = require("../../model/addressModel");
-const { findByIdAndUpdate } = require("../../model/notificationModel");
 const Product = require("../../model/productModel");
 const Seller = require("../../model/sellerModel");
 

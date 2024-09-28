@@ -4,9 +4,10 @@ const {allOrders,updateProductStatus,sellerOrders, userOrders} = require('../../
 const userAuth = require('../../middleWares/userAuth')
 const sellerAuth = require('../../middleWares/sellerAuth')
 const adminAuth = require('../../middleWares/adminAuth')
+const adminOrSellerAuth = require('../../middleWares/adminOrSellerAuth')
 
 router.get('/all-orders',adminAuth,allOrders)
-router.get('/seller-orders/:sellerId',sellerAuth,sellerOrders)
+router.get('/seller-orders/:sellerId',adminOrSellerAuth,sellerOrders)
 router.patch('/update-order',sellerAuth,updateProductStatus)
 router.get('/user-orders',userAuth,userOrders)
 

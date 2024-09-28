@@ -2,8 +2,12 @@
 
 const jwt = require("jsonwebtoken");
 
+
+
 const adminAuth = (req, res, next) => {
+ 
   const token = req.cookies.adminToken; 
+
 
   if (!token) {
     return res.status(401).json({
@@ -16,9 +20,9 @@ const adminAuth = (req, res, next) => {
   try {
     const verifyToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
-  
+ 
 
-    if (!verifyToken || !verifyToken.roles.includes("admin")) {
+    if (!verifyToken || !verifyToken.roles.includes('admin')) {
       
       return res.status(403).json({
         message: "Permission denied",
@@ -27,7 +31,9 @@ const adminAuth = (req, res, next) => {
       });
     }
 
+
     req.admin = verifyToken; 
+    console.log(req.admin,"xxxxxxxxxxx")
     next();
   } catch (error) {
     next(error);

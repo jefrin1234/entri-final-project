@@ -41,22 +41,34 @@ const allOrders = async (req, res, next) => {
 
 const sellerOrders = async (req, res, next) => {
   try {
-    const sellerId = req.seller.id || req.params.sellerId
 
-    // Fetch orders and filter them to include only those with products belonging to the seller
+     console.log("herrrrrrrrrr")
+     const sellerId = req.params.sellerId || req.
+     console.log(sellerId,"//////////")
+     console.log(req.params.sellerId)
+
     const orders = await Order.find().populate({
       path: 'items.productId',
       match: { sellerId: sellerId }, // Only get products belonging to this seller
     }).exec();
 
 
+  
+
+    if(!orders){
+      return res.status(404).json({
+        message:"No orders found",
+        error:true,
+        success:false
+      })
+    }
 
    
-
-    // Filter out orders that do not contain any products belonging to the seller
     const filteredOrders = orders.filter(order => 
-      order.items.some(item => item.productId) // Keep orders that have products populated
+      order.items.some(item => item.productId) 
     );
+
+   // console.log(filteredOrders,"77777777777")
 
     res.status(200).json({
       message: 'Seller orders',

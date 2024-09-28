@@ -459,7 +459,7 @@ try {
 
 const getSellerProducts = async (req, res, next) => {
   try {
-    console.log("iam gerr")
+   
      const sellerId = req.params.sellerId;
 
 
@@ -500,10 +500,7 @@ const getSellerProducts = async (req, res, next) => {
     const totalPages = Math.ceil(totalProducts / limit)
     
 
-     console.log(products,"ppppsdsd")
-      
-    console.log(totalPages,"qqqqqqqqqqq")
-
+ 
     res.status(200).json({
       message: "All products",
       data: products,

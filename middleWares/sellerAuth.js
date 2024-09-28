@@ -52,7 +52,9 @@
 const jwt = require("jsonwebtoken");
 
 const sellerAuth = (req, res, next) => {
-  const token = req.cookies.sellerToken; // Look for 'sellerToken'
+  const token = req.cookies.sellerToken; 
+  
+  // console.log(token,"0000")// Look for 'sellerToken'
 
   if (!token) {
     return res.status(401).json({
@@ -72,6 +74,8 @@ const sellerAuth = (req, res, next) => {
         error: true,
       });
     }
+
+    console.log(verifyToken,"KKKKK")
 
     req.seller = verifyToken; // Attach seller info to request
     next();
