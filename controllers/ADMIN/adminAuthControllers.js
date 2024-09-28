@@ -114,10 +114,12 @@ const adminProfile = async(req, res, next)=>{
 
 
  
-    const adminId = req.user.id
-    const role   = req.user.role
+    const adminId = req.admin.id
+   
 
-    const admin = await User.findById(adminId).select("-password")
+    const admin = await Admin.findById(adminId).select("-password")
+
+   
 
     if (!admin) {
       return res.status(404).json({
@@ -127,15 +129,8 @@ const adminProfile = async(req, res, next)=>{
       })
     }
 
-    if(admin.role != 'admin'){
-      return  res.status(401).json({
-        Message:"error getting details",
-        erro:true,
-        success:false
-      })
-    }
-
-
+    console.log(admin)
+  
     res.status(200).json({
       message:"admin profile details",
       data:admin,
@@ -184,11 +179,36 @@ const checkAdmin = async (req, res, next) => {
 
 
 
- 
+
+const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const adminId = req.admin.id; 
+
+    const admin = await Admin.findById(adminId);
+    if (!admin) {
+      return res.status(404).json({ message: 'Admin not found' });
+    }
+
+   
+    const isMatch = await bcrypt.compare(currentPassword, admin.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Current password is incorrect' });
+    }
+
+    
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    admin.password = hashedNewPassword;
+    await admin.save();
+
+    return res.status(200).json({ message: 'Password updated successfully' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
 
 
 
-
-module.exports = {login,logOut,adminProfile,signup,checkAdmin}
+module.exports = {login,logOut,adminProfile,signup,checkAdmin,changePassword}
 
 

@@ -21,7 +21,7 @@ router.post("/check-user", userAuth, checkUser);
 
 
 
-router.post('/change-password',adminAuth,passwordChange)
+router.post('/change-password',userAuth,passwordChange)
 
 
 

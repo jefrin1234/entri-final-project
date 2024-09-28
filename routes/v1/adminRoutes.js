@@ -2,10 +2,11 @@ const express = require('express')
 const router = express.Router() 
 
 const adminAuth = require('../../middleWares/adminAuth')
-const { login, logOut, adminProfile, signup, checkAdmin } = require('../../controllers/ADMIN/adminAuthControllers')
+const { login, logOut, adminProfile, signup, checkAdmin, passwordChange, changePassword } = require('../../controllers/ADMIN/adminAuthControllers')
 const { getAdminNotification, updateNotification, deleteNotification } = require('../../controllers/ADMIN/adminNotificationController')
 const { getAllUsers, deleteUser, updateUserRole } = require('../../controllers/USER/userAuthControllers')
 const { getAllSellers, deleteSeller, unverifySeller } = require('../../controllers/ADMIN/SellerControllers')
+const sales = require('../../controllers/ADMIN/salesControllers')
 
 
 router.post('/signup',signup)
@@ -35,5 +36,9 @@ router.get('/all-sellers',adminAuth,getAllSellers)
 router.delete('/delete-seller/:sellerId',adminAuth,deleteSeller)
 
 router.patch('/unverify-seller/:sellerId',adminAuth,unverifySeller)
+
+router.get('/all-sales',adminAuth,sales)
+
+router.post('/password-change',adminAuth,changePassword)
 
 module.exports = router

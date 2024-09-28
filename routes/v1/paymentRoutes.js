@@ -3,6 +3,7 @@ const userAuth = require('../../middleWares/userAuth');
 const Product = require('../../model/productModel');
 const Cart = require('../../model/cartModel');
 const Order = require('../../model/orderModel');
+const Sales = require('../../model/salesModel');
 const router = express.Router()
 const stripe = require("stripe")(process.env.Stripe_Private_Api_Key);
 
@@ -15,13 +16,7 @@ router.post('/create-checkout-session', userAuth, async (req, res, next) => {
 
     const { items, address, totalPrice, shipping_rate } = req.body
 
-    // console.log(items)
-
-
-    // console.log(shipping_rate)
-
-    // console.log(address.emailAddress)
-
+   
     const lineItems = items.map(item => ({
       price_data: {
         currency: 'usd',
@@ -42,9 +37,9 @@ router.post('/create-checkout-session', userAuth, async (req, res, next) => {
           product_data: {
             name: 'Shipping Cost',
           },
-          unit_amount: Math.round(shipping_rate * 100), // Convert to cents
+          unit_amount: Math.round(shipping_rate * 100),
         },
-        quantity: 1 // Quantity of 1 for shipping
+        quantity: 1
       });
     }
 
@@ -57,9 +52,9 @@ router.post('/create-checkout-session', userAuth, async (req, res, next) => {
       
       cancel_url: `${CLIENT_URL}/failure`,
       metadata: {
-        userId: userId, // Include additional metadata (e.g., user ID)
-        totalPrice: totalPrice, // Store the total price for future reference
-        address: JSON.stringify(address), // Store the address as JSON (if needed)
+        userId: userId, 
+        totalPrice: totalPrice,
+        address: JSON.stringify(address), 
 
       },
     })
@@ -67,7 +62,7 @@ router.post('/create-checkout-session', userAuth, async (req, res, next) => {
   
 
 
-    const totalInDollars = (session.amount_total / 100).toFixed(2); // Converts cents to dollars
+    const totalInDollars = (session.amount_total / 100).toFixed(2); 
     console.log(`Total Amount: $${totalInDollars}`);
 
 
@@ -75,7 +70,7 @@ router.post('/create-checkout-session', userAuth, async (req, res, next) => {
       userId: userId,
       sessionId: session.id,
       items: items.map(item => ({
-        productId: item.productId._id, // Reference to the product
+        productId: item.productId._id,
         sellerId: item.productId.sellerId,
         price: item.price,
         quantity: item.quantity,
@@ -96,14 +91,11 @@ router.post('/create-checkout-session', userAuth, async (req, res, next) => {
     await order.save()
 
 
-
-    // console.log(order,"orderrerere")
-
     res.json({ id: session.id })
 
   } catch (error) {
     console.error('Error creating checkout session:', error);
-    next(error); // Pass the error to the next middleware for handling
+    next(error); 
   }
 })
 
@@ -122,74 +114,103 @@ router.post("/payment-success", userAuth, async (req, res, next) => {
     const trimmedSessionId = sessionId.trim();
     const order = await Order.findOne({ sessionId: trimmedSessionId });
 
-    // console.log(order, "xxxxxxx")
+    
 
     if (order) {
-      order.paymentStatus = session.payment_status; // Update the payment status
+      order.paymentStatus = session.payment_status; 
 
-      await order.save(); // Save the updated order
-
+      await order.save();
     } else {
       console.log("Order not found");
     }
 
-    // console.log("ima herr")
+   
 
     let productsToRemove;
 
     if (session.payment_status === 'paid') {
-       productsToRemove = order.items.map(item => item.productId.toString()); // Extract product IDs
+       productsToRemove = order.items.map(item => item.productId.toString()); // 
 
-      // console.log(productsToRemove, "hiiii")
+    
     }
 
     for (const productId of productsToRemove) {
-      // Simulating the deleteCart logic directly here
+    
       const cart = await Cart.findOne({ userId });
-      // console.log("reached here")
-      // console.log(cart, "ssss")
-
+     
       if (!cart) {
         console.log("Cart not found");
-        continue; // Skip if cart not found
+        continue;
       }
 
       const updatedItems = cart.items.filter(item => !item.productId.equals(productId));
 
       if (updatedItems.length === cart.items.length) {
         console.log("Product not found in cart");
-        continue; // Skip if product not found in cart
+        continue;
       }
 
-      // Update the cart items and recalculate total price
+      
       cart.items = updatedItems;
-      await cart.calculateTotalPrice(); // Ensure this function exists and works properly
+      await cart.calculateTotalPrice();
 
-      // Save the updated cart
+     
       await cart.save();
 
-      // console.log(cart,"///////////")
+
 
     }
+
 
     for (const item of order.items) {
       const product = await Product.findById(item.productId);
 
       if (product) {
-        console.log(product,"000999000")
-        // Subtract the ordered quantity from the product's stock
+       
         product.stock -= item.quantity;
 
-        // Ensure stock doesn't go below 0 (optional)
+       
         if (product.stock < 0) {
           product.stock = 0;
         }
 
-        // Save the updated product with new stock value
+       
         await product.save();
-        // console.log(`Updated stock for product ${product._id}: New stock is ${product.stock}`);
+       
       }
     }
+
+ 
+    const items = order.items;
+
+    for (let item of items) {
+      // Fetch the product to get sellerId
+      const product = await Product.findById(item.productId);
+    
+      if (product) {
+        const saleData = new Sales({
+          productId: item.productId,
+          sellerId: product.sellerId, // Now we can access sellerId from the product
+          userId:userId,
+          quantity: item.quantity,
+          saleAmount: item.quantity * item.price, // Fixed the typo here (toalPrice -> totalPrice)
+          dateOfSale: new Date(),
+        });
+    
+        try {
+          await saleData.save(); // Save the sale record
+          console.log("Sale record created:", saleData); // Log each sale record created
+        } catch (error) {
+          console.error("Error saving sale record:", error);
+        }
+      } else {
+        console.log(`Product with ID ${item.productId} not found.`);
+      }
+    }
+    
+
+
+   
   
     res.json({
       message: "payment is successfull",

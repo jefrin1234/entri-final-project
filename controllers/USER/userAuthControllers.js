@@ -226,7 +226,7 @@ const passwordChange = async(req,res,next)=>{
   const { currentPassword, newPassword } = req.body;
   console.log(currentPassword,newPassword)
   const userId = req.user.id; // Assuming you're using authentication middleware
-
+  console.log(userId,"fffff")
   try {
     const user = await User.findById(userId);
     if (!user) {
