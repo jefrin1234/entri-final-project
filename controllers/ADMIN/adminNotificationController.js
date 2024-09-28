@@ -4,12 +4,9 @@ const getAdminNotification = async (req, res, next) => {
   try {
     const adminId = req.admin.id;
 
-  
-    console.log(adminId)
-    // Assuming notifications are linked to the admin using receiverId
     const notifications = await Notification.find({ receiverId: adminId, deleted: false })
 
-    if (!notifications || notifications.length === 0) {
+    if (!notifications) {
       return res.status(404).json({
         message: "No notifications available",
         success: false,

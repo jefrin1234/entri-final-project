@@ -18,9 +18,9 @@ const sellerSchema = new mongoose.Schema({
   },
   businessName:{
     type:String,
-    required:true
+    required:true                  
   },
-  city: {
+  city: {                                   
     type: String,
     required: true
   },
@@ -75,7 +75,7 @@ const sellerSchema = new mongoose.Schema({
     required:true
   },
   verified:{
-    type:String,
+    type:Boolean,
     default:false
   },
   deleted: { type: Boolean, default: false },

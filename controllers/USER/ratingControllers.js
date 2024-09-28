@@ -1,4 +1,4 @@
-const  mongoose  = require("mongoose");
+const mongoose = require("mongoose");
 const Order = require("../../model/orderModel")
 const Product = require("../../model/productModel")
 const Rating = require("../../model/ratingModel")
@@ -10,22 +10,23 @@ const hasPurchasedProduct = async (userId, productId) => {
     const order = await Order.findOne({
       userId: userId,
       "items.productId": productId,
-      paymentStatus:'paid'
+      paymentStatus: 'paid'
     })
 
     return order !== null;
   } catch (error) {
-   
+
     return false
   }
 };
 
 const addRating = async (req, res, next) => {
   try {
+
     const userId = req.user.id;
+
     const { productId, rating, comment } = req.body;
 
-    console.log(productId, rating, comment,"giiiii")
 
     if (!productId || !rating || !comment) {
       return res.status(400).json({
@@ -44,9 +45,12 @@ const addRating = async (req, res, next) => {
       });
     }
 
+
+
     const existingRating = await Rating.findOne({ userId, productId });
 
     if (existingRating) {
+
       return res.status(400).json({
         message: "You cannot add more than one rating for a product",
         error: true,
@@ -54,9 +58,14 @@ const addRating = async (req, res, next) => {
       });
     }
 
+
+
     const newRating = new Rating({ userId, productId, rating, comment });
+    console.log(newRating)
     await newRating.save();
-                         
+
+    console.log(newRating)
+
     res.status(201).json({
       message: "Rating added",
       data: newRating,
@@ -73,7 +82,7 @@ const getProductRatings = async (req, res, next) => {
   try {
     const { productId } = req.params;
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5; // Default limit of 5 items per page
+    const limit = parseInt(req.query.limit) || 5;
 
     if (!productId) {
       return res.status(400).json({
@@ -83,14 +92,12 @@ const getProductRatings = async (req, res, next) => {
       });
     }
 
-    const totalRatings = await Rating.countDocuments({ productId }); // Total number of ratings
+    const totalRatings = await Rating.countDocuments({ productId }); 
     const productRatings = await Rating.find({ productId })
       .populate({
         path: 'userId',
         select: '-password -email -image -role',
-      })
-      .skip((page - 1) * limit) // Pagination logic
-      .limit(limit);
+      }).skip((page - 1) * limit).limit(limit);
 
     if (!productRatings || productRatings.length === 0) {
       return res.status(200).json({
@@ -103,7 +110,7 @@ const getProductRatings = async (req, res, next) => {
     res.status(200).json({
       message: "Product ratings",
       data: productRatings,
-      totalRatings, // Sending total number of ratings
+      totalRatings,
       success: true,
       error: false,
     });
@@ -114,10 +121,10 @@ const getProductRatings = async (req, res, next) => {
 
 
 
-const getAllRatings = async (req, res,next) => {
+const getAllRatings = async (req, res, next) => {
 
   try {
-   
+
     const ratings = await Rating.find({})
 
     if (!ratings || ratings.length === 0) {
@@ -144,12 +151,13 @@ const getAllRatings = async (req, res,next) => {
 const getRatingByUserId = async (req, res, next) => {
   try {
     const userId = req.user.id // Getting userId from request parameters
- 
+
 
     // Use find method to search by userId
-    const ratings = await Rating.find({ userId
+    const ratings = await Rating.find({
+      userId
     });
-    
+
     if (ratings.length === 0) {
       return res.status(404).json({
         message: "Ratings not found",
@@ -173,16 +181,16 @@ const getRatingByUserId = async (req, res, next) => {
 };
 
 
-const updateRating = async (req, res,next) => {
+const updateRating = async (req, res, next) => {
 
- try {
-   
+  try {
+
     const userId = req.user.id
-   
-    const { rating, comment, ratingId } = req.body
-  
 
-    const findRating = await Rating.findOne({ _id:ratingId })
+    const { rating, comment, ratingId } = req.body
+
+
+    const findRating = await Rating.findOne({ _id: ratingId })
 
 
     if (!findRating) {
@@ -193,9 +201,9 @@ const updateRating = async (req, res,next) => {
       })
     }
 
-    const updatedRating = await Rating.findOneAndUpdate({ _id: ratingId,userId }, { rating, comment, }, { new: true })
+    const updatedRating = await Rating.findOneAndUpdate({ _id: ratingId, userId }, { rating, comment, }, { new: true })
 
-    
+
 
     res.status(200).json({
       message: "rating updated",
@@ -208,39 +216,20 @@ const updateRating = async (req, res,next) => {
     next(error)
   }
 
-} 
+}
 
 
 
 const deleteRating = async (req, res, next) => {
   try {
-  
-    const {ratingId} = req.body; // Assuming you're passing the ratingId in the request params
-    const userId = req.user.id; 
 
-    
-    // ID of the currently logged-in user
-    const userRole = req.user.roles;
-   
-    // Assuming `req.user.role` contains the user's role, e.g., 'user' or 'admin'
+    const { ratingId } = req.body; 
 
-    // Find and delete the rating in one step
-    let rating;
 
-    // If the user is an admin, allow them to delete any rating
-    if (userRole.includes('admin')) {
-      rating = await Rating.findById(ratingId);
-      rating.deleted = true
-      await rating.save()
-    } else {
-      // If the user is not an admin, allow them to delete only their own rating
-      rating = await Rating.findOne({ _id: ratingId, userId: userId });
+   const  rating = await Rating.findByIdAndDelete(ratingId);
 
-      rating.deleted = true
-      await rating.save()
-    }
+     
 
-    // If no rating is found, return a 404 error
     if (!rating) {
       return res.status(404).json({
         message: "Rating not found",
@@ -249,7 +238,7 @@ const deleteRating = async (req, res, next) => {
       });
     }
 
-    // If rating is found and deleted, return a success response
+   
     res.status(200).json({
       message: "Rating deleted successfully",
       error: false,
@@ -257,10 +246,10 @@ const deleteRating = async (req, res, next) => {
     });
 
   } catch (error) {
-    next(error); // Pass the error to the error-handling middleware
+    next(error);
   }
 };
 
 
 
-module.exports = { addRating, getProductRatings, getAllRatings, updateRating, deleteRating,getRatingByUserId }
+module.exports = { addRating, getProductRatings, getAllRatings, updateRating, deleteRating, getRatingByUserId }

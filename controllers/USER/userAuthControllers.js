@@ -4,6 +4,8 @@ const { createToken, createUserToken } = require('../../utils/createToken');
 
 
 const { findByIdAndUpdate } = require('../../model/addressModel');
+const { updateMany } = require('../../model/orderModel');
+const Rating = require('../../model/ratingModel');
 
 
 const login = async (req, res, next) => {
@@ -167,6 +169,7 @@ const userLogout = async (req, res, next) => {
  
 const checkUser = async (req, res, next) => {
   try {
+    console.log("puuui")
       const { user } = req;
       if (!user) {
           res.status(401).json({ success: false, message: "user not autherized" });
@@ -179,10 +182,11 @@ const checkUser = async (req, res, next) => {
   }
 };
 
-const updateUserRole = async (req, res) => {
+const updateUserRole = async (req, res,next) => {
   try {
-    const userId = req.user.id;
-
+ 
+  
+    const userId = req.params.userId
    
     let user = await User.findOne({ _id: userId });
 
@@ -194,18 +198,22 @@ const updateUserRole = async (req, res) => {
       });
     }
 
-    if (!user.roles.includes('admin')) {
-      user.roles.push('admin');
+    if (!user.role.includes('admin')) {
+      user.role.push('admin')
     }
 
   
     await user.save();
 
+  
+
+
+
     res.status(200).json({
       message: "User role updated",
       error: false,
       success: true,
-      data: user
+     
     });
   } catch (error) {
     
@@ -274,4 +282,37 @@ const getAllUsers =  async(req,res,next)=>{
 }
 
 
-module.exports = {login,signup, userProfile,userLogout,checkUser,updateUserRole,passwordChange,getAllUsers}
+const deleteUser = async(req,res,next)=>{
+
+  try {
+
+    const {userId} = req.params
+
+
+    await Rating.deleteMany({ userId: userId });
+
+
+    const user = await User.findByIdAndDelete(userId)
+
+    if(!user){
+      return res.status(404).json({
+        message:"User not found",
+        error:true,
+        success:false,
+        
+      })
+    }
+
+    res.status(200).json({
+      message:"User deleted",
+      error:false,
+      success:true
+    })
+
+  } catch (error) {
+    next(error) 
+  }
+}
+
+
+module.exports = {login,signup, userProfile,userLogout,checkUser,updateUserRole,passwordChange,getAllUsers,deleteUser}

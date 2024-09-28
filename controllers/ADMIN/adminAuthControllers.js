@@ -56,7 +56,7 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body
      
-    
+  
     if (!email || !password) {
       return res.status(400).json({
         message: "all fields are required",
@@ -70,6 +70,7 @@ const login = async (req, res, next) => {
  
 
     if (!admin) {
+   
       return res.status(404).json({
         message: "admin not found",
         error: true,

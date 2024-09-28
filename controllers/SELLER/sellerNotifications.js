@@ -13,7 +13,7 @@ try {
 
   console.log(notifications,"eeeee")
 
-  if( notifications.length === 0){
+  if(!notifications){
    
     return res.status(200).json({
       message:"No notifications found",

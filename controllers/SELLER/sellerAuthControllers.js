@@ -6,6 +6,7 @@ const  Admin = require('../../model/adminModel');
 const { handleImageUpload } = require('../../utils/imageUpload');
 const Notification = require('../../model/notificationModel');
 const nodemailer = require('nodemailer');
+const Product = require('../../model/productModel');
 
 
 //controller for seller  account creation
@@ -121,8 +122,7 @@ const verifySeller = async (req, res, next) => {
       });
     }
 
-    seller.verified = true;
-    await seller.save();
+   
   } catch (error) {
     return next(error); // Pass the error to the error-handling middleware
   }
@@ -139,7 +139,7 @@ const verifySeller = async (req, res, next) => {
   // Email details
   const mailOptions = {
     from: 'jefrinjames212@gmail.com',
-    to: seller.email,
+    to:seller.email,
     subject: 'Seller Verification Success',
     html: `
       <h1>Congratulations!</h1>
@@ -151,10 +151,24 @@ const verifySeller = async (req, res, next) => {
 
   // Try sending the email
   try {
+
     await transporter.sendMail(mailOptions);
-   
+
+    seller.verified = true;
+    await seller.save();
+
+    await Product.updateMany(
+      { sellerId:seller._id }, // Filter by sellerId
+      { $set: { verified: true } } // Set verified to false
+    );
+
   } catch (error) {
-    return next(error); // If email sending fails, pass the error to the next middleware and exit
+    console.log(error)
+    return res.status(500).json({
+      message: "Failed to verify seller. Email not sent.",
+      error: true,
+      success: false,
+    }); // If email sending fails, pass the error to the next middleware and exit
   }
 
   const sellerData = seller.toObject();
@@ -205,6 +219,14 @@ const SellerLogin = async (req, res, next) => {
         message: "password doesnt match",
         error: true,
         success: false
+      })
+    }
+
+    if(existingUser.verified === false){
+      return res.status(404).json({
+        message:"Not authorized",
+        error:false,
+        success:true
       })
     }
 
@@ -282,6 +304,8 @@ const checkSeller = async (req, res, next) => {
      next(error)
   }
 };
+
+
 
 
 

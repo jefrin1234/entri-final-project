@@ -6,7 +6,7 @@ const adminAuth = require('../../middleWares/adminAuth')
 const {getSellerNotifications, deleteSellerNotification, getNotificationById, updateNotification} = require('../../controllers/SELLER/sellerNotifications')
 const { stepOneValidation, stepTwoValidation } = require('../../controllers/SELLER/verificationStepController')
 const Order = require('../../model/orderModel')
-const anyAuth = require('../../middleWares/anyAuth')
+const adminOrSellerAuth = require('../../middleWares/adminOrSellerAuth')
 
 
 
@@ -16,7 +16,7 @@ router.post('/signin', upload.single('registrationCertificate'),sellerSignup)
 router.post('/verify-seller',adminAuth,verifySeller)
 router.post('/login',SellerLogin)
 router.post('/logout',sellerLogout)
-router.get('/profile/:sellerId',anyAuth,sellerProfile)
+router.get('/profile/:sellerId',adminOrSellerAuth,sellerProfile)
 router.post('/check-seller',sellerAuth,checkSeller)
 router.get('/notifications',sellerAuth,getSellerNotifications)
 router.delete('/delete-notification/:notificationId',sellerAuth,deleteSellerNotification)

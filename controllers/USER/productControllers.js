@@ -46,11 +46,7 @@ const addProduct = async (req, res, next) => {
         }
       }
 
-      // console.log(imageUrls)
-
-     
-
-
+    
       const product = new Product({
         sellerId,
         name,
@@ -72,8 +68,7 @@ const addProduct = async (req, res, next) => {
      
       const admins = await Admin.find()
 
-    //  console.log(admins)
-      
+
   
   
       for( let admin of admins){
@@ -87,11 +82,6 @@ const addProduct = async (req, res, next) => {
        console.log(notification,"mmmmmmmmmmm")
         
       }
-    
-     console.log(product)
-   
-      
-
 
       res.status(201).json({
         message:"product saved waiting for verificvation",
@@ -115,9 +105,6 @@ const verifyProduct = async (req, res, next) => {
  
   const adminId = req.admin.id
 
-  console.log(productId,"1111")
-
-  console.log(adminId,"2222")
 
 
   try {
@@ -135,9 +122,8 @@ const verifyProduct = async (req, res, next) => {
     product.verified = true; // Update the verification status
     await product.save();
    
-     console.log(product,"fuck")
+   
 
-     console.log(product.sellerId)
 
     const notification = new Notification({
       senderId:adminId,
@@ -163,16 +149,10 @@ const verifyProduct = async (req, res, next) => {
 };
 
 
-
-
-
-
-
-
 const getCategoryProducts = async (req, res, next) => {
   try {
     const { brand, name, category, sort, ...filters } = req.query;
-    let query = { verified: true }
+    let query = { verified: true,deleted:false }
 
     // Apply filters dynamically
     if (category) {
@@ -190,7 +170,7 @@ const getCategoryProducts = async (req, res, next) => {
       query[key] = value;
     }
 
-    console.log("Query Object: ", query);
+ 
 
     // Find products based on the query
     let products = await Product.find(query);
@@ -204,7 +184,7 @@ const getCategoryProducts = async (req, res, next) => {
       });
     }
 
-    console.log("Products: ", products);
+   
 
     res.json({
       message: 'category products',
@@ -256,10 +236,10 @@ const productByCategory = async (req, res, next) => {
   try {
     const { category } = req.params;
 
-    // Filter for products that are verified and belong to the specified category
-    const query = { category, verified: true };
+  
+    const query = { category, verified: true ,deleted:false};
 
-    // Fetch distinct brands, colours, and names for verified products in the category
+    
     const brands = await Product.find(query).distinct('brand');
     const colours = await Product.find(query).distinct('colour');
     const name = await Product.find(query).distinct('name');
@@ -278,30 +258,45 @@ const productByCategory = async (req, res, next) => {
 
 const productsByQueries = async (req, res, next) => {
   try {
-    const searchQuery = req.query.q; // Get the search query from the request
+   
+    const searchQuery = req.query.q;
+    const page = parseInt(req.query.page) || 1; 
+    const limit = parseInt(req.query.limit) || 10; 
 
-    if (!searchQuery) {
-      return res.status(400).json({
-        message: "No search query provided",
-        error: true,
-        success: false,
-      });
+    
+    let matchQuery = {
+      deleted:false,
+      verified:true
+    };
+
+   
+    if (searchQuery) {
+     
+      const searchWords = searchQuery.split(' ').filter(word => word);
+
+     
+      const regexQueries = searchWords.map(word => new RegExp(word, 'i'));
+
+    
+      matchQuery = {
+        "$or": [
+          { name: { $in: regexQueries } },
+          { category: { $in: regexQueries } },
+          { brand: { $in: regexQueries } },
+        ]
+      };
     }
 
-    // Split the search query into words for better search (e.g., 'puma jeans' becomes ['puma', 'jeans'])
-    const searchWords = searchQuery.split(' ').filter(word => word);
+  
+    const totalProducts = await Product.countDocuments(matchQuery);
 
-    // Create regex for each search word
-    const regexQueries = searchWords.map(word => new RegExp(word, 'i'));
+   
+    const products = await Product.find(matchQuery)
+      .skip((page - 1) * limit) 
 
-    // Find products where any word matches the name, category, or brand
-    const products = await Product.find({
-      "$or": [
-        { name: { $in: regexQueries } },
-        { category: { $in: regexQueries } },
-        { brand: { $in: regexQueries } },
-      ]
-    });
+     
+   
+    const totalPages = Math.ceil(totalProducts / limit);
 
     if (!products || products.length === 0) {
       return res.status(404).json({
@@ -311,17 +306,30 @@ const productsByQueries = async (req, res, next) => {
       });
     }
 
-    return res.status(200).json({
+
+    
+
+  
+    const response = {
       message: 'Products found',
       error: false,
       success: true,
       data: products,
-    });
+      pagination: {
+        totalProducts,
+        totalPages,
+        currentPage: page,
+        limit,
+      }
+    };
+
+    return res.status(200).json(response);
 
   } catch (error) {
     next(error);
   }
 };
+
 
 
 const updateProduct = async(req,res,next)=>{
@@ -331,8 +339,7 @@ try {
    const sellerId = req.seller.id
    const productId = req.params.productId
    
-   console.log(sellerId)
-   console.log(productId)
+ 
  
   const { name, category, brand, price, sellingPrice, stock, description, existingImages,colour } = req.body;
 
@@ -410,23 +417,77 @@ try {
 }
 
 
-const getSellerProducts= async (req, res, next) => {
-  try {
+// const getSellerProducts= async (req, res, next) => {
+//   try {
    
-    const sellerId = req.params.sellerId
+//     const sellerId = req.params.sellerId
 
-    // Get the page and limit query params from the request, or set default values
-    const page = parseInt(req.query.page) || 1; // Default to page 1
-    const limit = parseInt(req.query.limit) || 6; // Default limit to 6 products per page
+    
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = parseInt(req.query.limit) || 6; 
 
-    // Calculate how many products to skip based on current page
+   
+//     const skip = (page - 1) * limit;
+
+//     const products = await Product.find({ deleted: false,sellerId:sellerId,verified:true })
+//       .skip(skip) 
+//       .limit(limit);
+
+//     const totalProducts = await Product.countDocuments({ deleted: false });
+
+//     if (!products || products.length === 0) {
+//       return res.status(404).json({
+//         message: "No products found",
+//         error: true,
+//         success: false
+//       });
+//     }
+
+//     res.status(200).json({
+//       message: "All products",
+//       data: products,
+//       currentPage: page,
+//       totalPages: Math.ceil(totalProducts / limit),
+//       totalProducts,
+//       error: false,
+//       success: true
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+const getSellerProducts = async (req, res, next) => {
+  try {
+    console.log("iam gerr")
+     const sellerId = req.params.sellerId;
+
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const searchQuery = req.query.q || ''; // Get search query
+
     const skip = (page - 1) * limit;
 
-    const products = await Product.find({ deleted: false,sellerId:sellerId,verified:true })
-      .skip(skip) // Skip the products for previous pages
-      .limit(limit); // Limit the number of products per page
+    // Construct search criteria based on the search query
+    const searchCriteria = {
+      deleted: false,
+      sellerId: sellerId,
+      verified: true,
+      $or: [
+        { name: { $regex: searchQuery, $options: 'i' } }, // Case insensitive search on name
+        { category: { $regex: searchQuery, $options: 'i' } }, // Case insensitive search on category
+        { brand: { $regex: searchQuery, $options: 'i' } } // Case insensitive search on brand
+      ]
+    };
 
-    const totalProducts = await Product.countDocuments({ deleted: false }); // Get total product count
+    // Fetch products based on search criteria, pagination, and limit
+    const products = await Product.find(searchCriteria)
+      .skip(skip)
+      .limit(limit);
+
+    // Get total count of products matching the search criteria
+    const totalProducts = await Product.countDocuments(searchCriteria);
 
     if (!products || products.length === 0) {
       return res.status(404).json({
@@ -435,24 +496,109 @@ const getSellerProducts= async (req, res, next) => {
         success: false
       });
     }
+    
+    const totalPages = Math.ceil(totalProducts / limit)
+    
+
+     console.log(products,"ppppsdsd")
+      
+    console.log(totalPages,"qqqqqqqqqqq")
 
     res.status(200).json({
       message: "All products",
       data: products,
       currentPage: page,
-      totalPages: Math.ceil(totalProducts / limit),
+      totalPages:totalPages,
       totalProducts,
       error: false,
       success: true
     });
+
+    
+
   } catch (error) {
     next(error);
   }
 };
 
 
+const toggleProductVerification = async (req, res, next) => {
+  try {
+    const adminId = req.admin.id;
+    const productId = req.params.productId;
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found",
+        error: true,
+        success: false,
+      });
+    }
+
+  
+  // Toggle the verified status
+product.verified = !product.verified;
+
+await product.save();
+
+// Create a notification message based on the new status
+const message = product.verified
+  ? "Your product has been verified by the admin."
+  : "Due to some reasons, this product has been unverified by the admin.";
+
+const notification = new Notification({
+  senderId: adminId,
+  receiverId: product.sellerId,
+  message,
+  data: product,
+});
+
+await notification.save();
+
+res.status(200).json({
+  message: `Product has been ${product.verified ? 'verified' : 'unverified'}.`,
+  error: false,
+  success: true,
+  data: product,
+});
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteproduct = async(req,res,next)=>{
+  try {
+    const productId = req.params.productId
+
+    const product = await Product.findByIdAndDelete(productId)
+
+    if(!product){
+      return res.status(404).json({
+        message:"Product not found",
+        error:true,
+        success:false
+      })
+    }
+
+    res.status(200).json({
+      message:"Product deleted successfully",
+      error:false,
+      success:true
+    })
+
+  } catch (error) {
+    next(error)
+  }
+}
+
+
+
+
 module.exports = {
   addProduct, getCategoryProducts,
-  getProductById, productByCategory, productsByQueries,updateProduct,getSellerProducts,verifyProduct
+  getProductById, productByCategory, productsByQueries,updateProduct,getSellerProducts,verifyProduct,toggleProductVerification,deleteproduct
 }
 

@@ -5,8 +5,8 @@ const userAuth = require('../../middleWares/userAuth')
 const sellerAuth = require('../../middleWares/sellerAuth')
 const adminAuth = require('../../middleWares/adminAuth')
 
-router.get('/add-orders',adminAuth,allOrders)
-router.get('/seller-orders',sellerAuth,sellerOrders)
+router.get('/all-orders',adminAuth,allOrders)
+router.get('/seller-orders/:sellerId',sellerAuth,sellerOrders)
 router.patch('/update-order',sellerAuth,updateProductStatus)
 router.get('/user-orders',userAuth,userOrders)
 

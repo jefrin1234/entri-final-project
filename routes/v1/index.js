@@ -22,5 +22,6 @@ v1Router.use('/admin',adminRoutes)
 v1Router.use('/payment',paymenRoutes)
 v1Router.use('/orders',orderRoutes)
 v1Router.use('/favourites',favouriteRoutes)
+
 module.exports = v1Router
 // exporting v1Router

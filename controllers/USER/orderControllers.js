@@ -1,33 +1,55 @@
 const Order = require("../../model/orderModel")
 
-const allOrders = async(req,res,next)=>{
 
- try {
-  const adminId = req.admin.id
+const allOrders = async (req, res, next) => {
+  try {
+    const { sortBy, sortOrder, orderStatus, paymentMethod } = req.query;
 
-  const orders = await Order.find({})
+    // Construct sort object based on the sortField and sortOrder
+    let sort = {};
+    if (sortBy === 'totalPrice') {
+      sort.totalPrice = sortOrder === 'asc' ? 1 : -1; // Ascending or Descending based on sortOrder
+    } else if (sortBy === 'createdAt') {
+      sort.createdAt = sortOrder === 'asc' ? 1 : -1; // Sorting by createdAt as a fallback
+    }
 
-  res.json({
-    message:"All orders",
-    success:true,
-    error:false,
-    data:orders
-  })
- } catch (error) {
-  next(error)
- }
+    // Construct filter object based on orderStatus and paymentMethod
+    let filter = {};
+    if (orderStatus) {
+      filter.orderStatus = orderStatus;
+    }
+    if (paymentMethod) {
+      filter.paymentMethod = paymentMethod;
+    }
 
-}
+    // Fetch orders based on filter and sort options
+    const orders = await Order.find(filter)
+      .populate({ path: 'items.productId' })
+      .populate({ path: 'items.sellerId', select: 'businessName' })
+      .sort(sort)
+      .lean();
+
+    res.status(200).json({ data: orders }); // Ensure response matches frontend expectations
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+
 
 const sellerOrders = async (req, res, next) => {
   try {
-    const sellerId = req.seller.id;
+    const sellerId = req.seller.id || req.params.sellerId
 
     // Fetch orders and filter them to include only those with products belonging to the seller
     const orders = await Order.find().populate({
       path: 'items.productId',
       match: { sellerId: sellerId }, // Only get products belonging to this seller
     }).exec();
+
+
 
    
 
