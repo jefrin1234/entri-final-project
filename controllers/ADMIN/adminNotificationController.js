@@ -1,7 +1,8 @@
 const Notification = require("../../model/notificationModel");
 
 const getAdminNotification = async (req, res, next) => {
-  try {
+  try { 
+    console.log("here iamm")
     const adminId = req.admin.id;
 
     const notifications = await Notification.find({ receiverId: adminId, deleted: false })
