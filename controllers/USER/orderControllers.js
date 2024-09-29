@@ -82,22 +82,24 @@ const sellerOrders = async (req, res, next) => {
   }
 };
 
-
-
 const userOrders = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    
 
-    // Find orders and populate the 'productId' field within 'items'
-    const orders = await Order.find({ userId }).populate({
-      path: 'items.productId',
-      model: 'Product', // Adjust 'Product' to match your actual product model name
-     
-    });
-    
+    // Find orders, populate 'productId', sort by 'createdAt' in descending order, and filter out unpaid card payments
+    const orders = await Order.find({
+      userId,
+      $nor: [
+        { paymentStatus: 'unpaid', paymentMethod: 'card' }, // Exclude orders with both 'unpaid' and 'card' payment method
+      ],
+    })
+      .populate({
+        path: 'items.productId',
+        model: 'Product', // Adjust 'Product' to match your actual product model name
+      })
+      .sort({ createdAt: -1 }); // Sort orders by 'createdAt' in descending order
 
-    if (!orders) {
+    if (!orders || orders.length === 0) { // Checking if there are no orders
       return res.status(404).json({
         message: "User orders not found",
         error: true,
@@ -115,6 +117,8 @@ const userOrders = async (req, res, next) => {
     next(error);
   }
 };
+
+
 
 
 const updateProductStatus = async (req, res, next) => {

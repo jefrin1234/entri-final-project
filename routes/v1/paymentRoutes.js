@@ -15,7 +15,8 @@ router.post('/create-checkout-session', userAuth, async (req, res, next) => {
     const userId = req.user.id
 
     const { items, address, totalPrice, shipping_rate } = req.body
-
+   
+    console.log(shipping_rate,"[[[[[[]]]]")
    
     const lineItems = items.map(item => ({
       price_data: {
@@ -184,22 +185,22 @@ router.post("/payment-success", userAuth, async (req, res, next) => {
     const items = order.items;
 
     for (let item of items) {
-      // Fetch the product to get sellerId
+    
       const product = await Product.findById(item.productId);
     
       if (product) {
         const saleData = new Sales({
           productId: item.productId,
-          sellerId: product.sellerId, // Now we can access sellerId from the product
+          sellerId: product.sellerId, 
           userId:userId,
           quantity: item.quantity,
-          saleAmount: item.quantity * item.price, // Fixed the typo here (toalPrice -> totalPrice)
+          saleAmount: item.quantity * item.price,
           dateOfSale: new Date(),
         });
     
         try {
-          await saleData.save(); // Save the sale record
-          console.log("Sale record created:", saleData); // Log each sale record created
+          await saleData.save(); 
+          console.log("Sale record created:", saleData); 
         } catch (error) {
           console.error("Error saving sale record:", error);
         }

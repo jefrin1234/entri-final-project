@@ -41,7 +41,7 @@ const addToFavourites = async (req, res, next) => {
         products: [productId]
       });
     } else {
-      // Check if product is already in the list
+      
       if (favourites.products.includes(productId)) {
         return res.status(400).json({
           message: "Product is already in favourites",
@@ -73,7 +73,6 @@ const removeFromFavourites = async (req, res, next) => {
     const userId = req.user.id;
     const { productId } = req.body;
 
-    // Find the user's favourites
     const favourites = await Favourite.findOne({ userId });
 
     if (!favourites) {
@@ -84,7 +83,6 @@ const removeFromFavourites = async (req, res, next) => {
       });
     }
 
-    // Check if the product exists in the favourites array
     if (!favourites.products.includes(productId)) {
       return res.status(404).json({
         message: "Product not found in favourites",
@@ -93,7 +91,7 @@ const removeFromFavourites = async (req, res, next) => {
       });
     }
 
-    // Remove the product from the array
+ 
     favourites.products = favourites.products.filter(
       (id) => id.toString() !== productId
     );

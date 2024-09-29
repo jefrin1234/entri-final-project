@@ -7,36 +7,22 @@ const Admin = require('../../model/adminModel');
 
 
 
-//controller for user signup
 const signup = async (req, res,next) => {
 
   try {
 
 
-    const {  email, password } = req.body  //destructuring  name,email,password and profile picture from the  body
-
-    //checking for all required fields .if name,email,and password not in the request body sending 404 error message
+    const {  email, password } = req.body 
 
 
-  
-    // if the user exists sending 404 error, conflict with the current state of the resource which is the email already exists
-
-
-    const saltRounds = 10; //determines the  complexity of generating a salt for hashing a password 
+    const saltRounds = 10; 
 
 
    
-    const hashedPassword = bcrypt.hashSync(password, saltRounds) // hashing the password
+    const newAdmin = new Admin({  email, password: hashedPassword, }) 
 
-    //if the file from the front-end is true then calling the handleImageUpload   function and sending the path that is received from the multer to the function
-
-    
-
-    const newAdmin = new Admin({  email, password: hashedPassword, }) // creating new user
-
-    await newAdmin.save() // saving newuser
-
-    //sending status 201 for creating  new user successfull
+    await newAdmin.save() 
+   
     res.status(201).json({
       message: "admin saved",
       data: newAdmin,
@@ -45,7 +31,7 @@ const signup = async (req, res,next) => {
     })
 
   } catch (error) {
-    next(error) // sending error to the next function by using next()
+    next(error) 
   }
 
 }

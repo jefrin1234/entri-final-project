@@ -36,12 +36,12 @@ try {
 
 
 
-// Get Notification by ID
+
 const getNotificationById = async (req, res) => {
   try {
-    const { notificationId } = req.params;  // Extract notification ID from request params
+    const { notificationId } = req.params; 
 
-    // Find the notification by ID
+
     const notification = await Notification.findById(notificationId);
 
    
@@ -103,7 +103,6 @@ const updateNotification = async (req, res) => {
     const notificationId = req.params.notificationId;
     const newData = req.body;
 
-    // Find and update the notification in one step
     const updatedNotification = await Notification.findByIdAndUpdate(notificationId, newData, { new: true });
 
     if (!updatedNotification) {

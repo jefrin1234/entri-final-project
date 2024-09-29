@@ -3,7 +3,7 @@ const Sales = require("../../model/salesModel");
 
 const sales = async (req, res, next) => {
   try {
-    // Fetch total revenue
+   
     const totalRevenue = await Sales.aggregate([
       {
         $group: {
@@ -13,34 +13,33 @@ const sales = async (req, res, next) => {
       }
     ]);
 
-    // Fetch yearly sales data
+    
     const yearlySales = await Sales.aggregate([
       {
         $group: {
-          _id: { year: { $year: "$dateOfSale" } }, // Group by year
-          totalSales: { $sum: "$saleAmount" }, // Sum of sales amount
-          totalQuantity: { $sum: "$quantity" } // Sum of quantities
+          _id: { year: { $year: "$dateOfSale" } },
+          totalSales: { $sum: "$saleAmount" }, 
+          totalQuantity: { $sum: "$quantity" }
         }
       },
-      { $sort: { "_id.year": 1 } } // Sort by year
+      { $sort: { "_id.year": 1 } } 
     ]);
 
-    // Fetch monthly sales data
     const monthlySales = await Sales.aggregate([
       {
         $group: {
           _id: {
-            year: { $year: "$dateOfSale" }, // Group by year
-            month: { $month: "$dateOfSale" } // Group by month
+            year: { $year: "$dateOfSale" }, 
+            month: { $month: "$dateOfSale" } 
           },
-          totalSales: { $sum: "$saleAmount" }, // Sum of sales amount
-          totalQuantity: { $sum: "$quantity" } // Sum of quantities
+          totalSales: { $sum: "$saleAmount" }, 
+          totalQuantity: { $sum: "$quantity" }
         }
       },
-      { $sort: { "_id.year": 1, "_id.month": 1 } } // Sort by year and month
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
     ]);
 
-    // Fetch daily sales data (already implemented)
+   
     const dailySales = await Sales.aggregate([
       {
         $group: {
@@ -56,7 +55,6 @@ const sales = async (req, res, next) => {
       { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } }
     ]);
 
-    // Fetch top-selling products (already implemented)
     const topSellingProducts = await Sales.aggregate([
       {
         $group: {
@@ -94,16 +92,16 @@ const sales = async (req, res, next) => {
       success: true,
       data: {
         totalRevenue: totalRevenue[0]?.totalRevenue || 0,
-        yearlySales, // Return the yearly sales data
-        monthlySales, // Return the monthly sales data
-        dailySales, // Return the daily sales data
-        topSellingProducts // Return the top-selling products data
+        yearlySales, 
+        monthlySales,
+        dailySales, 
+        topSellingProducts 
       }
     });
 
   } catch (error) {
     console.error("Error fetching sales data:", error);
-    next(error); // Pass the error to the next middleware for handling
+    next(error); 
   }
 };
 

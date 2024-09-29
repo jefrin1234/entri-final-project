@@ -1,5 +1,4 @@
-const handleError = async (error, req, res, next) => {    //error is received from the controller 
-  //send the  error that is got from the  catch blockm in the error  controlller 
+const handleError = async (error, req, res, next) => {    
   try {
     const statusCode = error.statusCode || 500;
     const message = error.message || "Something went wrong, please try again";
@@ -8,7 +7,8 @@ const handleError = async (error, req, res, next) => {    //error is received fr
     res.status(statusCode).json({ message });
 
   }
-  // if the error is  not sending properly then this catch block runs and sends  a common error
+ 
+
   catch (error) {
     res.status(error.statusCode || 500).json({ message: error.message || "Internal server error" });
   }

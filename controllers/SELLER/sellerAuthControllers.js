@@ -9,19 +9,18 @@ const nodemailer = require('nodemailer');
 const Product = require('../../model/productModel');
 
 
-//controller for seller  account creation
 const sellerSignup = async (req, res,next) => {
 
   try {
 
   
-     //destructuring  name,email,password and profile picture from the  body
+    
     const { name, email, password ,accountHolderName,accountNumber,bankName,ifsc,pan,city,state,postalCode,phone,gstinNumber,pickupLocation, businessName} = req.body  
    
 
    
   
-  //  checking for all required fields .if name,email,and password not in the request body sending 404 error message
+
     if (!name || !email || !password || !accountHolderName || !accountNumber || !bankName || !ifsc ||  !pan || !city || !state || !postalCode || !phone || !gstinNumber || !pickupLocation || ! businessName ) {
       return res.status(400).json({
         message: "all fields are required",
@@ -33,11 +32,7 @@ const sellerSignup = async (req, res,next) => {
     const existingUser = await Seller.findOne({
     accountNumber,deleted: false
     });
-    //checking for existing user
-
-   
-   
-   // if the user exists sending 404 error, conflict with the current state of the resource which is the email already exists
+    
     if (existingUser) {
      
       return res.status(409).json({
@@ -49,12 +44,10 @@ const sellerSignup = async (req, res,next) => {
 
   
 
-     const saltRounds = 10; //determines the  complexity of generating a salt for hashing a password 
-
+     const saltRounds = 10; 
 
    
-     const hashedPassword = bcrypt.hashSync(password, saltRounds) // hashing the password
-
+     const hashedPassword = bcrypt.hashSync(password, saltRounds) 
   
      let imageUrl;
    
@@ -65,13 +58,12 @@ const sellerSignup = async (req, res,next) => {
     
 
 
-     const newSeller = new Seller({ name, email, password: hashedPassword,accountHolderName,accountNumber,bankName,ifsc,registrationCetificate:imageUrl,pan,city,state,postalCode,phone,gstinNumber,pickupLocation, businessName}) // creating new user
+     const newSeller = new Seller({ name, email, password: hashedPassword,accountHolderName,accountNumber,bankName,ifsc,registrationCetificate:imageUrl,pan,city,state,postalCode,phone,gstinNumber,pickupLocation, businessName})
 
-
-    await newSeller.save() // saving newSeller
+    await newSeller.save()
    
     const sellerData = newSeller.toObject();
-    delete sellerData.password; // Removing the password field
+    delete sellerData.password; 
     
 
 
@@ -124,15 +116,15 @@ const verifySeller = async (req, res, next) => {
 
    
   } catch (error) {
-    return next(error); // Pass the error to the error-handling middleware
+    return next(error); 
   }
 
-  // Setup nodemailer transporter
+
   const transporter = nodemailer.createTransport({
-    service: 'gmail', // or another email service provider
+    service: 'gmail', 
     auth: {
-      user: 'jefrinjames212@gmail.com', // your email
-      pass: 'saln jyjr kwfn blrl', // your email password or an application-specific password
+      user: 'jefrinjames212@gmail.com', 
+      pass: 'saln jyjr kwfn blrl', 
     },
   });
 
@@ -149,7 +141,7 @@ const verifySeller = async (req, res, next) => {
     `,
   };
 
-  // Try sending the email
+  
   try {
 
     await transporter.sendMail(mailOptions);
@@ -158,8 +150,8 @@ const verifySeller = async (req, res, next) => {
     await seller.save();
 
     await Product.updateMany(
-      { sellerId:seller._id }, // Filter by sellerId
-      { $set: { verified: true } } // Set verified to false
+      { sellerId:seller._id }, 
+      { $set: { verified: true } } 
     );
 
   } catch (error) {
@@ -168,13 +160,11 @@ const verifySeller = async (req, res, next) => {
       message: "Failed to verify seller. Email not sent.",
       error: true,
       success: false,
-    }); // If email sending fails, pass the error to the next middleware and exit
+    });
   }
 
   const sellerData = seller.toObject();
-  delete sellerData.password; // Removing the password 
-
-  // If everything works, send the success response
+  delete sellerData.password; 
   return res.status(200).json({
     message: "Seller verification success",
     error: false,

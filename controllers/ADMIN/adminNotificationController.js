@@ -34,7 +34,7 @@ const updateNotification = async (req, res) => {
     const notificationId = req.params.notificationId;
     const newData = req.body;
 
-    // Find and update the notification in one step
+   
     const updatedNotification = await Notification.findByIdAndUpdate(notificationId, newData, { new: true });
 
     if (!updatedNotification) {

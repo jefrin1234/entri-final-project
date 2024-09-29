@@ -244,6 +244,7 @@ const productByCategory = async (req, res, next) => {
     const colours = await Product.find(query).distinct('colour');
     const name = await Product.find(query).distinct('name');
 
+    
     res.json({
       message: "Category products",
       data: { brands, colours, name },
@@ -255,49 +256,39 @@ const productByCategory = async (req, res, next) => {
   }
 };
 
-
 const productsByQueries = async (req, res, next) => {
   try {
-   
     const searchQuery = req.query.q;
-    const page = parseInt(req.query.page) || 1; 
-    const limit = parseInt(req.query.limit) || 10; 
 
-    
+    // Initial match query to filter deleted and unverified products
     let matchQuery = {
-      deleted:false,
-      verified:true
+      deleted: false,
+      verified: true,
     };
 
-   
+    // Check if a search query is provided
     if (searchQuery) {
-     
+      // Split the search query into individual words and filter out empty strings
       const searchWords = searchQuery.split(' ').filter(word => word);
 
-     
+      // Create regex queries for each search word (case-insensitive)
       const regexQueries = searchWords.map(word => new RegExp(word, 'i'));
 
-    
+      // Update matchQuery to search within name, category, and brand fields
       matchQuery = {
+        ...matchQuery,
         "$or": [
           { name: { $in: regexQueries } },
           { category: { $in: regexQueries } },
           { brand: { $in: regexQueries } },
-        ]
+        ],
       };
     }
 
-  
-    const totalProducts = await Product.countDocuments(matchQuery);
+    // Find all products matching the search query without pagination
+    const products = await Product.find(matchQuery);
 
-   
-    const products = await Product.find(matchQuery)
-      .skip((page - 1) * limit) 
-
-     
-   
-    const totalPages = Math.ceil(totalProducts / limit);
-
+    // Check if any products are found
     if (!products || products.length === 0) {
       return res.status(404).json({
         message: 'No products found',
@@ -306,21 +297,12 @@ const productsByQueries = async (req, res, next) => {
       });
     }
 
-
-    
-
-  
+    // Respond with the found products
     const response = {
       message: 'Products found',
       error: false,
       success: true,
       data: products,
-      pagination: {
-        totalProducts,
-        totalPages,
-        currentPage: page,
-        limit,
-      }
     };
 
     return res.status(200).json(response);
