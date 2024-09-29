@@ -48,10 +48,14 @@ const login = async (req, res, next) => {
 
     const token =  createUserToken(existingUser._id, existingUser.role)
 
+    const tokenOption = {
+      httpOnly : true,
+      secure : true
+     }
   
     
 
-    res.cookie("token",token);
+    res.cookie("token",token,tokenOption);
     res.status(200).json({ success: true,data:{_id:existingUser._id}, message: "user login successfull" });
 
 

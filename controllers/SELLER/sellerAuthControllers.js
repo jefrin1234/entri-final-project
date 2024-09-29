@@ -222,10 +222,14 @@ const SellerLogin = async (req, res, next) => {
 
     const sellerToken = createSellerToken(existingUser._id, "seller");
 
-
+    const tokenOption = {
+      httpOnly : true,
+      secure : true
+     }
+  
   
 
-    res.cookie("sellerToken", sellerToken);
+    res.cookie("sellerToken", sellerToken,tokenOption);
     res.status(200).json({ success: true,data:{id:existingUser._id,roles:existingUser.roles}, message: "Seller login successfull" });
 
 

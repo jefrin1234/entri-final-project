@@ -7,35 +7,6 @@ const Admin = require('../../model/adminModel');
 
 
 
-const signup = async (req, res,next) => {
-
-  try {
-
-
-    const {  email, password } = req.body 
-
-
-    const saltRounds = 10; 
-
-
-   
-    const newAdmin = new Admin({  email, password: hashedPassword, }) 
-
-    await newAdmin.save() 
-   
-    res.status(201).json({
-      message: "admin saved",
-      data: newAdmin,
-      success: true,
-      error: false
-    })
-
-  } catch (error) {
-    next(error) 
-  }
-
-}
-
 
 const login = async (req, res, next) => {
 
@@ -79,9 +50,13 @@ const login = async (req, res, next) => {
 
     const adminToken =  createAdminToken(admin._id, 'admin')
 
-    
+    const tokenOption = {
+      httpOnly : true,
+      secure : true
+     }
+  
 
-    res.cookie("adminToken",adminToken);
+    res.cookie("adminToken",adminToken,tokenOption);
     res.status(200).json({ success: true,data:{id:admin._id,roles:admin.roles}, message: " login successfull" });
 
 
@@ -195,6 +170,6 @@ const changePassword = async (req, res) => {
 
 
 
-module.exports = {login,logOut,adminProfile,signup,checkAdmin,changePassword}
+module.exports = {login,logOut,adminProfile,checkAdmin,changePassword}
 
 
