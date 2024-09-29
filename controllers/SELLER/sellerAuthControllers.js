@@ -305,7 +305,11 @@ const checkSeller = async (req, res, next) => {
 
 const sellerLogout = async (req, res, next) => {
   try {
-      res.clearCookie("sellerToken");
+      res.clearCookie("sellerToken", {
+        httpOnly: true,
+        secure: true, // Match this with login cookie options
+        sameSite: "None",
+      });
       res.json({ message: "seller logout success", success: true });
   } catch (error) {
     
