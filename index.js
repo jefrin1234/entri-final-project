@@ -21,6 +21,7 @@ app.use(cors({
 }));
 
 
+
 app.use(express.json())
 
 
@@ -31,8 +32,8 @@ app.get("/", (req, res) => {
 
 app.use('/api',apiRouter)
 
-app.use(handleError);
-
+app.use(handleError);                   
+                                     
 
 app.listen(3000,()=>console.log("server running on port 3000"))
 
