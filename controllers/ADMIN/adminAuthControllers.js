@@ -114,7 +114,11 @@ const adminProfile = async(req, res, next)=>{
 
 const logOut = async (req, res, next) => {
   try {
-      res.clearCookie("adminToken");
+      res.clearCookie("adminToken",{
+        httpOnly: true,
+        secure: true, 
+        sameSite: "None",
+      });
       res.json({ message: " logout success", success: true });
   } catch (error) {
      

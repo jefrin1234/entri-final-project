@@ -54,7 +54,11 @@ const login = async (req, res, next) => {
     // }
 
 
-    res.cookie("Token", token)
+    res.cookie("Token", token,{
+      httpOnly: true,
+      secure: true, // Match this with login cookie options
+      sameSite: "None",
+    })
     res.status(200).json({ success: true,data:{_id:existingUser._id}, message: "user login successfull" });
 
 
@@ -158,13 +162,12 @@ const userLogout = async (req, res, next) => {
   try {
  
    
-    res.clearCookie("Token");
+    res.clearCookie("Token",{
+      httpOnly: true,
+      secure: true, // Match this with login cookie options
+      sameSite: "None",
+    })
 
-  //   {
-  //     sameSite: "None",
-  //     secure: true,
-  //     httpOnly: true,
-  // }
       
       res.status(200).json({ message: "user logout success", success: true,error:false });
       
