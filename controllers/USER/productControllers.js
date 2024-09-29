@@ -399,45 +399,6 @@ try {
 }
 
 
-// const getSellerProducts= async (req, res, next) => {
-//   try {
-   
-//     const sellerId = req.params.sellerId
-
-    
-//     const page = parseInt(req.query.page) || 1;
-//     const limit = parseInt(req.query.limit) || 6; 
-
-   
-//     const skip = (page - 1) * limit;
-
-//     const products = await Product.find({ deleted: false,sellerId:sellerId,verified:true })
-//       .skip(skip) 
-//       .limit(limit);
-
-//     const totalProducts = await Product.countDocuments({ deleted: false });
-
-//     if (!products || products.length === 0) {
-//       return res.status(404).json({
-//         message: "No products found",
-//         error: true,
-//         success: false
-//       });
-//     }
-
-//     res.status(200).json({
-//       message: "All products",
-//       data: products,
-//       currentPage: page,
-//       totalPages: Math.ceil(totalProducts / limit),
-//       totalProducts,
-//       error: false,
-//       success: true
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
 
 const getSellerProducts = async (req, res, next) => {
   try {
@@ -447,28 +408,27 @@ const getSellerProducts = async (req, res, next) => {
 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const searchQuery = req.query.q || ''; // Get search query
+    const searchQuery = req.query.q || ''; 
 
     const skip = (page - 1) * limit;
 
-    // Construct search criteria based on the search query
+    
     const searchCriteria = {
       deleted: false,
       sellerId: sellerId,
       verified: true,
       $or: [
-        { name: { $regex: searchQuery, $options: 'i' } }, // Case insensitive search on name
-        { category: { $regex: searchQuery, $options: 'i' } }, // Case insensitive search on category
-        { brand: { $regex: searchQuery, $options: 'i' } } // Case insensitive search on brand
+        { name: { $regex: searchQuery, $options: 'i' } },
+        { category: { $regex: searchQuery, $options: 'i' } },
+        { brand: { $regex: searchQuery, $options: 'i' } } 
       ]
     };
 
-    // Fetch products based on search criteria, pagination, and limit
     const products = await Product.find(searchCriteria)
       .skip(skip)
       .limit(limit);
 
-    // Get total count of products matching the search criteria
+  
     const totalProducts = await Product.countDocuments(searchCriteria);
 
     if (!products || products.length === 0) {
@@ -517,12 +477,12 @@ const toggleProductVerification = async (req, res, next) => {
     }
 
   
-  // Toggle the verified status
+  
 product.verified = !product.verified;
 
 await product.save();
 
-// Create a notification message based on the new status
+
 const message = product.verified
   ? "Your product has been verified by the admin."
   : "Due to some reasons, this product has been unverified by the admin.";

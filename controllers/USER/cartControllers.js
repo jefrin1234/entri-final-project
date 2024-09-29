@@ -3,8 +3,11 @@ const Cart = require("../../model/cartModel")
 const addToCart = async (req, res, next) => {
 
   try {
+    console.log("hitted")
     const { productId, price, quantity } = req.body
     const userId = req.user.id
+
+
    
   console.log(req.body,userId)
     

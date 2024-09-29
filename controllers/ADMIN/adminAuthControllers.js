@@ -50,13 +50,16 @@ const login = async (req, res, next) => {
 
     const adminToken =  createAdminToken(admin._id, 'admin')
 
-    const tokenOption = {
-      httpOnly : true,
-      secure : true
-     }
-  
 
-    res.cookie("adminToken",adminToken,tokenOption);
+
+
+    res.cookie("adminToken",adminToken,{
+      httpOnly: true,
+      secure: true, 
+      sameSite: 'None'
+    })
+ 
+
     res.status(200).json({ success: true,data:{id:admin._id,roles:admin.roles}, message: " login successfull" });
 
 

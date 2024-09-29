@@ -6,6 +6,7 @@ const { createToken, createUserToken } = require('../../utils/createToken');
 const { findByIdAndUpdate } = require('../../model/addressModel');
 const { updateMany } = require('../../model/orderModel');
 const Rating = require('../../model/ratingModel');
+const { options } = require('../../routes');
 
 
 const login = async (req, res, next) => {
@@ -48,14 +49,12 @@ const login = async (req, res, next) => {
 
     const token =  createUserToken(existingUser._id, existingUser.role)
 
-    const tokenOption = {
-      httpOnly : true,
-      secure : true
-     }
-  
-    
 
-    res.cookie("token",token,tokenOption);
+    res.cookie("Token", token,{
+      httpOnly: true,
+      secure: true, // Set to true if using HTTPS
+      sameSite: 'None' // Allows cross-site cookie sending
+    })
     res.status(200).json({ success: true,data:{_id:existingUser._id}, message: "user login successfull" });
 
 
@@ -161,9 +160,14 @@ const userProfile = async (req, res, next) => {
 
 const userLogout = async (req, res, next) => {
   try {
-    console.log("going")
-      res.clearCookie("token");
+    console.log("going")  
+     
+    console.log(req.cookies,"moneee")
+
+      res.clearCookie('Token');
+      
       res.status(200).json({ message: "user logout success", success: true,error:false });
+      
   } catch (error) {
     
       next(error)

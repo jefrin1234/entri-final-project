@@ -16,7 +16,8 @@ const createUserToken = (id, roles) => {
         const  token = jwt.sign({ id: id, roles: roles || ["user"] }, process.env.JWT_SECRET_KEY);
         return token;
     } catch (error) {
-       next(error)
+      console.log(error)
+      throw new Error("Token creation failed");
     }
 };
 
@@ -25,7 +26,8 @@ const createAdminToken = (id, roles) => {
         const  token = jwt.sign({ id: id, roles: [roles] || ["admin"] }, process.env.JWT_SECRET_KEY);
         return token;
     } catch (error) {
-       next(error)
+      console.log(error)
+      throw new Error("Token creation failed");
     }
 };
 

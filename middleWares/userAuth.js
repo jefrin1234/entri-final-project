@@ -4,9 +4,9 @@ const userAuth = (req, res, next) => {
 
   try {
 
-    const token = req.cookies.token
+    const token = req.cookies.Token
 
-    
+
    
     if (!token) {
       return res.status(401).json({

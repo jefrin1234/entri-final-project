@@ -7,7 +7,7 @@ const Sales = require('../../model/salesModel');
 const router = express.Router()
 const stripe = require("stripe")(process.env.Stripe_Private_Api_Key);
 
-const CLIENT_URL = process.env.CLIENT_DOMAIN;
+
 
 router.post('/create-checkout-session', userAuth, async (req, res, next) => {
   try {
@@ -49,9 +49,9 @@ router.post('/create-checkout-session', userAuth, async (req, res, next) => {
       line_items: lineItems,
       customer_email: address.emailAddress,
       mode: 'payment',
-      success_url:  `${CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`, 
+      success_url:  `https://entri-final-project-user-page.vercel.app/success?session_id={CHECKOUT_SESSION_ID}`, 
       
-      cancel_url: `${CLIENT_URL}/failure`,
+      cancel_url: `https://entri-final-project-user-page.vercel.app/failure`,
       metadata: {
         userId: userId, 
         totalPrice: totalPrice,
