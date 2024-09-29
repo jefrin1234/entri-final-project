@@ -151,10 +151,11 @@ const verifyProduct = async (req, res, next) => {
 
 const getCategoryProducts = async (req, res, next) => {
   try {
+    console.log("iaam herr")
     const { brand, name, category, sort, ...filters } = req.query;
     let query = { verified: true,deleted:false }
 
-    // Apply filters dynamically
+    
     if (category) {
       query.category = category;
     }
@@ -165,14 +166,14 @@ const getCategoryProducts = async (req, res, next) => {
       query.name = name;
     }
     
-    // Add additional filters
+   
     for (const [key, value] of Object.entries(filters)) {
       query[key] = value;
     }
 
  
 
-    // Find products based on the query
+    
     let products = await Product.find(query);
 
     // Apply sorting if specified

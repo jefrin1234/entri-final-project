@@ -3,10 +3,8 @@ const User = require('../../model/userModel');
 const { createToken, createUserToken } = require('../../utils/createToken');
 
 
-const { findByIdAndUpdate } = require('../../model/addressModel');
-const { updateMany } = require('../../model/orderModel');
 const Rating = require('../../model/ratingModel');
-const { options } = require('../../routes');
+
 
 
 const login = async (req, res, next) => {
@@ -49,12 +47,14 @@ const login = async (req, res, next) => {
 
     const token =  createUserToken(existingUser._id, existingUser.role)
 
+    // ,{
+    //   httpOnly: true,
+    //   secure: true, // Set to true if using HTTPS
+    //   sameSite: 'None' // Allows cross-site cookie sending
+    // }
 
-    res.cookie("Token", token,{
-      httpOnly: true,
-      secure: true, // Set to true if using HTTPS
-      sameSite: 'None' // Allows cross-site cookie sending
-    })
+
+    res.cookie("Token", token)
     res.status(200).json({ success: true,data:{_id:existingUser._id}, message: "user login successfull" });
 
 
@@ -66,15 +66,12 @@ const login = async (req, res, next) => {
 }
 
 
-//controller for user signup
 const signup = async (req, res,next) => {
 
   try {
 
     
-    const { name, email, password } = req.body  //destructuring  name,email,password and profile picture from the  body
-
-    //checking for all required fields .if name,email,and password not in the request body sending 404 error message
+    const { name, email, password } = req.body  //
     if (!name || !email || !password) {
       return res.status(400).json({
         message: "all fields are required",
@@ -83,9 +80,8 @@ const signup = async (req, res,next) => {
       })
     }
 
-    const existingUser = await User.findOne({ email }) //checking for existing user
+    const existingUser = await User.findOne({ email }) //
 
-    // if the user exists sending 404 error, conflict with the current state of the resource which is the email already exists
     if (existingUser) {
       return res.status(409).json({
         message: "user already exists",
@@ -94,20 +90,20 @@ const signup = async (req, res,next) => {
       })
     }
 
-    const saltRounds = 10; //determines the  complexity of generating a salt for hashing a password 
+    const saltRounds = 10; 
 
 
    
-    const hashedPassword = bcrypt.hashSync(password, saltRounds) // hashing the password
+    const hashedPassword = bcrypt.hashSync(password, saltRounds) 
 
   
     
 
-    const newUser = new User({ name, email, password: hashedPassword }) // creating new user
+    const newUser = new User({ name, email, password: hashedPassword })
 
-    await newUser.save() // saving newuser
+    await newUser.save() 
 
-    //sending status 201 for creating  new user successfull
+   
     res.status(201).json({
       message: "user saved",
       data: {_id:newUser._id},
@@ -116,7 +112,7 @@ const signup = async (req, res,next) => {
     })
 
   } catch (error) {
-    next(error) // sending error to the next function by using next()
+    next(error) 
   }
 
 }
@@ -160,15 +156,15 @@ const userProfile = async (req, res, next) => {
 
 const userLogout = async (req, res, next) => {
   try {
-    console.log("going")  
-     
-    console.log(req.cookies,"moneee")
+ 
+   
+    res.clearCookie("Token");
 
-    res.clearCookie("Token", {
-      sameSite: "None",
-      secure: true,
-      httpOnly: true,
-  });
+  //   {
+  //     sameSite: "None",
+  //     secure: true,
+  //     httpOnly: true,
+  // }
       
       res.status(200).json({ message: "user logout success", success: true,error:false });
       
@@ -181,7 +177,7 @@ const userLogout = async (req, res, next) => {
  
 const checkUser = async (req, res, next) => {
   try {
-    console.log("puuui")
+   console.log("iiiiiiiiii")
       const { user } = req;
       if (!user) {
           res.status(401).json({ success: false, message: "user not autherized" });

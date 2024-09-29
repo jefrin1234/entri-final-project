@@ -13,11 +13,13 @@ ConnectDB()
 app.use(cookieParser())
 
 
+// Correct CORS usage
 app.use(cors({
-  credentials : true,
- 
-  origin:'https://entri-final-project-user-page.vercel.app/'
-}))
+  origin: true, // Frontend URL
+  credentials: true,               // To allow cookies
+  methods: ['POST', 'GET', 'PUT', 'DELETE', 'OPTIONS'],
+}));
+
 
 app.use(express.json())
 
