@@ -15,8 +15,8 @@ app.use(cookieParser())
 
 app.use(cors({
   credentials : true,
-  // origin :['https://entri-final-project-user-page.vercel.app/','http://localhost:5173']
-  origin:true
+ 
+  origin:'https://entri-final-project-user-page.vercel.app/'
 }))
 
 app.use(express.json())
