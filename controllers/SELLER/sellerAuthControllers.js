@@ -136,7 +136,7 @@ const verifySeller = async (req, res, next) => {
     html: `
       <h1>Congratulations!</h1>
       <p>Your seller account has been successfully verified.</p>
-      <p><a href="https://entri-final-project-user-page.vercel.app/login">Click here to log in to your account</a></p>
+      <p><a href="http:/localhost:5174/login">Click here to log in to your account</a></p>
       <p>If you did not request this verification, please contact support.</p>
     `,
   };
@@ -222,13 +222,13 @@ const SellerLogin = async (req, res, next) => {
 
     const sellerToken = createSellerToken(existingUser._id, "seller");
 
- 
+    // ,{
+    //   httpOnly: true,
+    //   secure: true, 
+    //   sameSite: 'None'
+    // }
 
-    res.cookie("sellerToken", sellerToken,{
-      httpOnly: true,
-      secure: true, 
-      sameSite: 'None'
-    })
+    res.cookie("sellerToken", sellerToken)
 
     res.status(200).json({ success: true,data:{id:existingUser._id,roles:existingUser.roles}, message: "Seller login successfull" });
 
@@ -305,11 +305,14 @@ const checkSeller = async (req, res, next) => {
 
 const sellerLogout = async (req, res, next) => {
   try {
-      res.clearCookie("sellerToken", {
-        httpOnly: true,
-        secure: true, // Match this with login cookie options
-        sameSite: "None",
-      });
+
+    // , {
+    //   httpOnly: true,
+    //   secure: true, // Match this with login cookie options
+    //   sameSite: "None",
+    // }
+
+      res.clearCookie("sellerToken");
       res.json({ message: "seller logout success", success: true });
   } catch (error) {
     

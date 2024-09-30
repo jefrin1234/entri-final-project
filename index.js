@@ -17,7 +17,7 @@ app.use(cookieParser())
 app.use(cors({
   origin: true, // Frontend URL
   credentials: true,               // To allow cookies
-  methods: ['POST', 'GET', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['POST', 'GET', 'PUT', 'DELETE', 'OPTIONS' ,'PATCH'],
 }));
 
 

@@ -2,7 +2,7 @@
 
 
 const jwt = require("jsonwebtoken");
-
+ console.log("ivivdam vare")
 const sellerAuth = (req, res, next) => {
   const token = req.cookies.sellerToken; 
   

@@ -8,7 +8,7 @@ const adminOrSellerAuth = require('../../middleWares/adminOrSellerAuth')
 
 router.get('/all-orders',adminAuth,allOrders)
 router.get('/seller-orders/:sellerId',adminOrSellerAuth,sellerOrders)
-router.patch('/update-order',sellerAuth,updateProductStatus)
+router.post('/update-order',sellerAuth,updateProductStatus)
 router.get('/user-orders',userAuth,userOrders)
 
 module.exports = router

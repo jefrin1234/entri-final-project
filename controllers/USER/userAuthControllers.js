@@ -54,11 +54,7 @@ const login = async (req, res, next) => {
     // }
 
 
-    res.cookie("Token", token,{
-      httpOnly: true,
-      secure: true, // Match this with login cookie options
-      sameSite: "None",
-    })
+    res.cookie("Token", token)
     res.status(200).json({ success: true,data:{_id:existingUser._id}, message: "user login successfull" });
 
 
@@ -160,13 +156,15 @@ const userProfile = async (req, res, next) => {
 
 const userLogout = async (req, res, next) => {
   try {
- 
+    
+
+    // ,{
+    //   httpOnly: true,
+    //   secure: true, // Match this with login cookie options
+    //   sameSite: "None",
+    // }
    
-    res.clearCookie("Token",{
-      httpOnly: true,
-      secure: true, // Match this with login cookie options
-      sameSite: "None",
-    })
+    res.clearCookie("Token")
 
       
       res.status(200).json({ message: "user logout success", success: true,error:false });
@@ -180,7 +178,7 @@ const userLogout = async (req, res, next) => {
  
 const checkUser = async (req, res, next) => {
   try {
-   console.log("iiiiiiiiii")
+  
       const { user } = req;
       if (!user) {
           res.status(401).json({ success: false, message: "user not autherized" });

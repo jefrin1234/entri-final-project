@@ -483,6 +483,8 @@ product.verified = !product.verified;
 
 await product.save();
 
+console.log(product)
+
 
 const message = product.verified
   ? "Your product has been verified by the admin."

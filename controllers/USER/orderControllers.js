@@ -124,7 +124,7 @@ const userOrders = async (req, res, next) => {
 const updateProductStatus = async (req, res, next) => {
   try {
 
-   
+    console.log("caaan")
 
     const { orderId, itemId, newStatus } = req.body; 
 
