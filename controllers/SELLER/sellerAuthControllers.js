@@ -222,13 +222,13 @@ const SellerLogin = async (req, res, next) => {
 
     const sellerToken = createSellerToken(existingUser._id, "seller");
 
-    // ,{
-    //   httpOnly: true,
-    //   secure: true, 
-    //   sameSite: 'None'
-    // }
-
-    res.cookie("sellerToken", sellerToken)
+   
+    res.cookie("sellerToken", sellerToken ,{
+      httpOnly: true,
+      secure: true, 
+      sameSite: 'None'
+    }
+)
 
     res.status(200).json({ success: true,data:{id:existingUser._id,roles:existingUser.roles}, message: "Seller login successfull" });
 
@@ -306,13 +306,13 @@ const checkSeller = async (req, res, next) => {
 const sellerLogout = async (req, res, next) => {
   try {
 
-    // , {
-    //   httpOnly: true,
-    //   secure: true, // Match this with login cookie options
-    //   sameSite: "None",
-    // }
+  
 
-      res.clearCookie("sellerToken");
+      res.clearCookie("sellerToken"  , {
+        httpOnly: true,
+        secure: true, 
+        sameSite: "None",
+      });
       res.json({ message: "seller logout success", success: true });
   } catch (error) {
     

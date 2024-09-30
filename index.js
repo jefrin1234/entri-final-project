@@ -13,10 +13,9 @@ ConnectDB()
 app.use(cookieParser())
 
 
-// Correct CORS usage
 app.use(cors({
-  origin: true, // Frontend URL
-  credentials: true,               // To allow cookies
+  origin: true, 
+  credentials: true,               
   methods: ['POST', 'GET', 'PUT', 'DELETE', 'OPTIONS' ,'PATCH'],
 }));
 

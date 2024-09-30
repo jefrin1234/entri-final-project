@@ -50,14 +50,14 @@ const login = async (req, res, next) => {
 
     const adminToken =  createAdminToken(admin._id, 'admin')
 
-    // ,{
-    //   httpOnly: true,
-    //   secure: true, 
-    //   sameSite: 'None'
-    // }
+  
 
 
-    res.cookie("adminToken",adminToken)
+    res.cookie("adminToken",adminToken  ,{
+      httpOnly: true,
+      secure: true, 
+      sameSite: 'None'
+    })
  
 
     res.status(200).json({ success: true,data:{id:admin._id,roles:admin.roles}, message: " login successfull" });
@@ -115,13 +115,13 @@ const adminProfile = async(req, res, next)=>{
 const logOut = async (req, res, next) => {
   try {
 
-    // ,{
-    //   httpOnly: true,
-    //   secure: true, 
-    //   sameSite: "None",
-    // }
+  
 
-      res.clearCookie("adminToken");
+      res.clearCookie("adminToken"  ,{
+        httpOnly: true,
+        secure: true, 
+        sameSite: "None",
+      });
       res.json({ message: " logout success", success: true });
   } catch (error) {
      

@@ -11,7 +11,7 @@ const login = async (req, res, next) => {
    
   try {
     const { email, password } = req.body
-    // console.log(req.body);
+    
     
     if (!email || !password) {
       return res.status(400).json({
@@ -47,14 +47,14 @@ const login = async (req, res, next) => {
 
     const token =  createUserToken(existingUser._id, existingUser.role)
 
-    // ,{
-    //   httpOnly: true,
-    //   secure: true, // Set to true if using HTTPS
-    //   sameSite: 'None' // Allows cross-site cookie sending
-    // }
+    
 
 
-    res.cookie("Token", token)
+    res.cookie("Token", token,{
+      httpOnly: true,
+      secure: true, 
+      sameSite: 'None' 
+    })
     res.status(200).json({ success: true,data:{_id:existingUser._id}, message: "user login successfull" });
 
 
@@ -158,13 +158,13 @@ const userLogout = async (req, res, next) => {
   try {
     
 
-    // ,{
-    //   httpOnly: true,
-    //   secure: true, // Match this with login cookie options
-    //   sameSite: "None",
-    // }
    
-    res.clearCookie("Token")
+   
+    res.clearCookie("Token" ,{
+      httpOnly: true,
+      secure: true, 
+      sameSite: "None",
+    })
 
       
       res.status(200).json({ message: "user logout success", success: true,error:false });
