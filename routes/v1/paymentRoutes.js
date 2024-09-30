@@ -49,8 +49,8 @@ router.post('/create-checkout-session', userAuth, async (req, res, next) => {
       line_items: lineItems,
       customer_email: address.emailAddress,
       mode: 'payment',
-      success_url:  `http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `http://localhost:5173/failure`,
+      success_url:  `https://entri-final-project-user-page.vercel.app/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://entri-final-project-user-page.vercel.app/failure`,
       metadata: {
         userId: userId, 
         totalPrice: totalPrice,

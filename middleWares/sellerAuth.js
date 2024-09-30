@@ -2,7 +2,7 @@
 
 
 const jwt = require("jsonwebtoken");
- console.log("ivivdam vare")
+
 const sellerAuth = (req, res, next) => {
   const token = req.cookies.sellerToken; 
   
@@ -22,13 +22,12 @@ const sellerAuth = (req, res, next) => {
     if (!verifyToken || !verifyToken.roles.includes("seller")) {
       return res.status(403).json({
         message: "Permission denied",
-        success: false,
+        success: false,                 
         error: true,
       });
     }
 
-    console.log(verifyToken,"KKKKK")
-
+    
     req.seller = verifyToken; 
     next();
   } catch (error) {

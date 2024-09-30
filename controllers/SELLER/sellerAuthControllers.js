@@ -136,7 +136,7 @@ const verifySeller = async (req, res, next) => {
     html: `
       <h1>Congratulations!</h1>
       <p>Your seller account has been successfully verified.</p>
-      <p><a href="http:/localhost:5174/login">Click here to log in to your account</a></p>
+      <p><a href="https://entri-final-project-seller-page.vercel.app/login">Click here to log in to your account</a></p>
       <p>If you did not request this verification, please contact support.</p>
     `,
   };
