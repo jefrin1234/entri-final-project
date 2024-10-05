@@ -2,7 +2,7 @@ const Favourite = require('../../model/favouriteModel');
 
 const getAllFavourites = async (req, res, next) => {
   try {
-    console.log("hittt")
+  
     const userId = req.user.id;
 
     const favourites = await Favourite.findOne({ userId }).populate('products');
@@ -29,10 +29,10 @@ const getAllFavourites = async (req, res, next) => {
 
 const addToFavourites = async (req, res, next) => {
   try {
-    console.log("hittinggggg")
+ 
     const userId = req.user.id;
      const { productId } = req.body
-    console.log(req.body)
+
     let favourites = await Favourite.findOne({ userId });
 
     if (!favourites) {

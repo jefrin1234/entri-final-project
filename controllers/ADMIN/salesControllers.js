@@ -55,36 +55,7 @@ const sales = async (req, res, next) => {
       { $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } }
     ]);
 
-    const topSellingProducts = await Sales.aggregate([
-      {
-        $group: {
-          _id: "$productId",
-          totalQuantity: { $sum: "$quantity" },
-          totalSales: { $sum: "$saleAmount" }
-        }
-      },
-      { $sort: { totalQuantity: -1 } },
-      { $limit: 10 },
-      {
-        $lookup: {
-          from: "products",
-          localField: "_id",
-          foreignField: "_id",
-          as: "productDetails"
-        }
-      },
-      {
-        $unwind: "$productDetails"
-      },
-      {
-        $project: {
-          productId: "$_id",
-          productName: "$productDetails.name",
-          totalQuantity: 1,
-          totalSales: 1
-        }
-      }
-    ]);
+
 
     res.json({
       message: "Sales data",
@@ -95,7 +66,7 @@ const sales = async (req, res, next) => {
         yearlySales, 
         monthlySales,
         dailySales, 
-        topSellingProducts 
+       
       }
     });
 

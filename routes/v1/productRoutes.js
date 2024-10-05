@@ -3,12 +3,13 @@ const express = require('express')
 
 
 const userAuth = require('../../middleWares/userAuth')
-const { addProduct,getProductById, getCategoryProducts, productsByQueries, productByCategory, updateProduct, getSellerProducts, verifyProduct, deactivateProduct, toggleProductVerification, deleteproduct } = require('../../controllers/USER/productControllers')
+const { addProduct,getProductById, getCategoryProducts, productsByQueries, productByCategory, updateProduct, getSellerProducts, verifyProduct, toggleProductVerification, deleteproduct, topSellingProducts, deleteAllOrders, latestCollections } = require('../../controllers/USER/productControllers')
 const { upload } = require('../../middleWares/multer')
 const sellerAuth = require('../../middleWares/sellerAuth')
 const Admin = require('../../model/adminModel')
 const adminAuth = require('../../middleWares/adminAuth')
 const adminOrSellerAuth = require('../../middleWares/adminOrSellerAuth')
+
 
 
 
@@ -25,4 +26,7 @@ router.post('/update-product/:productId',upload.array('images'),sellerAuth,updat
 router.post('/verify-product/:productId',adminAuth,verifyProduct)
 router.post('/product-deactivate/:productId',adminAuth,toggleProductVerification)
 router.delete('/delete-product/:productId',adminOrSellerAuth,deleteproduct)
+router.get('/top-products',topSellingProducts)
+router.get('/latest-collection',latestCollections)
+
 module.exports = router

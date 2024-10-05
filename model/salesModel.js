@@ -6,6 +6,7 @@ const salesSchema = new mongoose.Schema({
   sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller', required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   quantity: { type: Number, required: true },
+  images:[String],
   saleAmount: { type: Number, required: true },
   dateOfSale: { type: Date, default: Date.now },
 });

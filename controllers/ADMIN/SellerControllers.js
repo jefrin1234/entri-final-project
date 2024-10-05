@@ -100,7 +100,6 @@ const unverifySeller = async(req,res,next)=>{
 
  const updatedProducts = await Product.find({ sellerId });
 
- console.log(updatedProducts);
 
  res.status(200).json({
   message:"seller account unverified",

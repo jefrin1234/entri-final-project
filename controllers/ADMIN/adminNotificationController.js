@@ -2,7 +2,7 @@ const Notification = require("../../model/notificationModel");
 
 const getAdminNotification = async (req, res, next) => {
   try { 
-    console.log("here iamm")
+   
     const adminId = req.admin.id;
 
     const notifications = await Notification.find({ receiverId: adminId, deleted: false })
@@ -31,7 +31,7 @@ const getAdminNotification = async (req, res, next) => {
 
 const updateNotification = async (req, res) => {
   try {
-    console.log("her iam coming")
+
     const notificationId = req.params.notificationId;
     const newData = req.body;
 

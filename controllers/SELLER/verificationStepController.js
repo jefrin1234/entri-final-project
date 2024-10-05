@@ -10,7 +10,7 @@ const stepOneValidation = async (req, res, next) => {
     const existingSeller = await Seller.find({ email })
 
     if (existingSeller.length != 0) {
-      console.log("existing")
+    
       return res.status(409).json({
         message: "Email already exist",
         error: false,

@@ -61,10 +61,8 @@ const addRating = async (req, res, next) => {
 
 
     const newRating = new Rating({ userId, productId, rating, comment });
-    console.log(newRating)
+ 
     await newRating.save();
-
-    console.log(newRating)
 
     res.status(201).json({
       message: "Rating added",
@@ -98,6 +96,7 @@ const getProductRatings = async (req, res, next) => {
         path: 'userId',
         select: '-password -email -image -role',
       }).skip((page - 1) * limit).limit(limit);
+
 
     if (!productRatings || productRatings.length === 0) {
       return res.status(200).json({
@@ -150,10 +149,10 @@ const getAllRatings = async (req, res, next) => {
 
 const getRatingByUserId = async (req, res, next) => {
   try {
-    const userId = req.user.id // Getting userId from request parameters
+    const userId = req.user.id
 
 
-    // Use find method to search by userId
+  
     const ratings = await Rating.find({
       userId
     });
@@ -166,7 +165,6 @@ const getRatingByUserId = async (req, res, next) => {
       });
     }
 
-    // Respond with the user's ratings
     res.status(200).json({
       message: "User ratings retrieved successfully",
       data: ratings,
@@ -175,7 +173,7 @@ const getRatingByUserId = async (req, res, next) => {
     });
 
   } catch (error) {
-    // Pass the error to the next middleware
+  
     next(error);
   }
 };

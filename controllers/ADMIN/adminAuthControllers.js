@@ -52,12 +52,12 @@ const login = async (req, res, next) => {
 
   
 
-
     res.cookie("adminToken",adminToken  ,{
       httpOnly: true,
       secure: true, 
       sameSite: 'None'
-    })
+    }
+)
  
 
     res.status(200).json({ success: true,data:{id:admin._id,roles:admin.roles}, message: " login successfull" });
@@ -116,12 +116,12 @@ const logOut = async (req, res, next) => {
   try {
 
   
-
       res.clearCookie("adminToken"  ,{
         httpOnly: true,
         secure: true, 
         sameSite: "None",
-      });
+      }
+  );
       res.json({ message: " logout success", success: true });
   } catch (error) {
      

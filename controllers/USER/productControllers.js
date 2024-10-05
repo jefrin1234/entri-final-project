@@ -1,6 +1,8 @@
 const Admin = require("../../model/adminModel");
 const Notification = require("../../model/notificationModel");
+const Order = require("../../model/orderModel");
 const Product = require("../../model/productModel");
+const Sales = require("../../model/salesModel");
 const { handleImageUpload } = require("../../utils/imageUpload");
 
 const addProduct = async (req, res, next) => {
@@ -11,7 +13,7 @@ const addProduct = async (req, res, next) => {
 
     const { name, category, brand, price, sellingPrice, stock, description,colour } = req.body
 
-    // console.log(req.body)
+   
     
     if (!name || !category || !price || !sellingPrice || !description || !stock || !brand || !colour) {
       return res.status(409).json({
@@ -39,10 +41,10 @@ const addProduct = async (req, res, next) => {
       let imageUrls = [];
 
       if (req.files && req.files.length > 0) {
-        // Loop through each file and upload it
+     
         for (const file of req.files) {
           const imageUrl = await handleImageUpload(file.path);
-          imageUrls.push(imageUrl); // Collect the URL of the uploaded image
+          imageUrls.push(imageUrl); 
         }
       }
 
@@ -79,8 +81,7 @@ const addProduct = async (req, res, next) => {
            data:product
          })
           await notification.save()
-       console.log(notification,"mmmmmmmmmmm")
-        
+   
       }
 
       res.status(201).json({
@@ -119,7 +120,7 @@ const verifyProduct = async (req, res, next) => {
       });
     }
 
-    product.verified = true; // Update the verification status
+    product.verified = true; 
     await product.save();
    
    
@@ -133,7 +134,7 @@ const verifyProduct = async (req, res, next) => {
     })
 
     await notification.save()
-   console.log(notification,"mairu")
+
  
 
     res.status(200).json({
@@ -151,7 +152,7 @@ const verifyProduct = async (req, res, next) => {
 
 const getCategoryProducts = async (req, res, next) => {
   try {
-    console.log("iaam herr")
+
     const { brand, name, category, sort, ...filters } = req.query;
     let query = { verified: true,deleted:false }
 
@@ -176,7 +177,7 @@ const getCategoryProducts = async (req, res, next) => {
     
     let products = await Product.find(query);
 
-    // Apply sorting if specified
+   
     if (sort) {
       products = products.sort((a, b) => {
         if (sort === 'price_asc') return a.price - b.price;
@@ -257,25 +258,24 @@ const productByCategory = async (req, res, next) => {
   }
 };
 
+
 const productsByQueries = async (req, res, next) => {
   try {
     const searchQuery = req.query.q;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10; 
+    const skip = (page - 1) * limit;
 
-    // Initial match query to filter deleted and unverified products
     let matchQuery = {
       deleted: false,
       verified: true,
     };
 
-    // Check if a search query is provided
+    
     if (searchQuery) {
-      // Split the search query into individual words and filter out empty strings
       const searchWords = searchQuery.split(' ').filter(word => word);
-
-      // Create regex queries for each search word (case-insensitive)
       const regexQueries = searchWords.map(word => new RegExp(word, 'i'));
 
-      // Update matchQuery to search within name, category, and brand fields
       matchQuery = {
         ...matchQuery,
         "$or": [
@@ -286,10 +286,14 @@ const productsByQueries = async (req, res, next) => {
       };
     }
 
-    // Find all products matching the search query without pagination
-    const products = await Product.find(matchQuery);
+  
+    const totalCount = await Product.countDocuments(matchQuery);
 
-    // Check if any products are found
+    const products = await Product.find(matchQuery)
+      .skip(skip)
+      .limit(limit);
+
+    
     if (!products || products.length === 0) {
       return res.status(404).json({
         message: 'No products found',
@@ -298,12 +302,19 @@ const productsByQueries = async (req, res, next) => {
       });
     }
 
-    // Respond with the found products
+   
+    const totalPages = Math.ceil(totalCount / limit);
     const response = {
       message: 'Products found',
       error: false,
       success: true,
       data: products,
+      pagination: {
+        totalCount,
+        totalPages,
+        currentPage: page,
+        itemsPerPage: limit,
+      },
     };
 
     return res.status(200).json(response);
@@ -312,7 +323,6 @@ const productsByQueries = async (req, res, next) => {
     next(error);
   }
 };
-
 
 
 const updateProduct = async(req,res,next)=>{
@@ -353,14 +363,14 @@ try {
   if (Array.isArray(existingImages)) {
     imageUrls = [...existingImages];
   } else if (existingImages) {
-    imageUrls.push(existingImages); // If only a single URL is provided
+    imageUrls.push(existingImages); 
   }
 
   if(req.files && req.files.length > 0){
     for (const file of req.files) {
-      // Upload the file to cloud storage (e.g., Cloudinary)
+    
       const uploadResult = await handleImageUpload(file.path);
-      imageUrls.push(uploadResult); // Add the uploaded image URL
+      imageUrls.push(uploadResult); 
     }
   }
 
@@ -483,7 +493,6 @@ product.verified = !product.verified;
 
 await product.save();
 
-console.log(product)
 
 
 const message = product.verified
@@ -536,11 +545,90 @@ const deleteproduct = async(req,res,next)=>{
   }
 }
 
+const topSellingProducts = async (req, res, next) => {
+  try {
+    const products = await Sales.aggregate([
+      {
+        $group: {
+          _id: "$productId",
+          totalQuantity: { $sum: "$quantity" },
+          totalSales: { $sum: "$saleAmount" },
+        },
+      },
+      { $sort: { totalQuantity: -1 } },
+      { $limit: 9 },
+      {
+        $lookup: {
+          from: "products",
+          localField: "_id", 
+          foreignField: "_id",
+          as: "productDetails",
+        },
+      },
+      {
+        $unwind: "$productDetails", 
+      },
+      {
+        $project: {
+          productId: "$_id",
+          name: "$productDetails.name",
+          totalQuantity: 1,
+          totalSales: 1,
+          images: "$productDetails.images", 
+          brand: "$productDetails.brand", 
+          sellingPrice: "$productDetails.sellingPrice", 
+          price: "$productDetails.price", 
+        },
+      },
+    ]);
 
+    if (!products) {
+      return res.json({
+        message: "No products found",
+        error: true,
+        success: false,
+      });
+    }
+
+    res.json({
+      message: "Top products", 
+      error: false,
+      success: true,
+      data: products,           
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const latestCollections = async(req,res,next)=>{
+ 
+
+  try {
+   
+    const products = await Product.find() 
+      .sort({ createdAt: -1 }) 
+      .limit(9); 
+    
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      data: products,
+    });
+  } catch (error) {
+  
+  
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch latest products',
+    });
+  }
+
+}
 
 
 module.exports = {
   addProduct, getCategoryProducts,
-  getProductById, productByCategory, productsByQueries,updateProduct,getSellerProducts,verifyProduct,toggleProductVerification,deleteproduct
+  getProductById, productByCategory, productsByQueries,updateProduct,getSellerProducts,verifyProduct,toggleProductVerification,deleteproduct,topSellingProducts,latestCollections
 }
 

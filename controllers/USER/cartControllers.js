@@ -3,13 +3,12 @@ const Cart = require("../../model/cartModel")
 const addToCart = async (req, res, next) => {
 
   try {
-    console.log("hitted")
+   
     const { productId, price, quantity } = req.body
     const userId = req.user.id
 
 
-   
-  console.log(req.body,userId)
+ 
     
 
     if (!productId || !price || !quantity) {
@@ -57,7 +56,7 @@ const addToCart = async (req, res, next) => {
 
     }
 
-    console.log(cart)
+  
 
     res.status(201).json({
       message: "Product added to the cart",
@@ -113,9 +112,9 @@ const deleteCart = async (req, res, next) => {
 
     const { productId } = req.params;
 
-    console.log("++++",productId)
+   
 
-    // Ensure productId is provided
+  
     if (!productId) {
       return res.status(409).json({
         message: "Product ID is required",
@@ -124,7 +123,7 @@ const deleteCart = async (req, res, next) => {
       });
     }
 
-    // Find the cart for the user
+   
     const cart = await Cart.findOne({ userId });
 
     if (!cart) {
@@ -135,12 +134,11 @@ const deleteCart = async (req, res, next) => {
       });
     }
 
-    //  console.log(cart)
-
+   
   
     const updatedItems = cart.items.filter(item => !item.productId.equals(productId));
 
-    console.log(updatedItems,"1233")
+  
 
     if (updatedItems.length === cart.items.length) {
       return res.status(404).json({
@@ -150,11 +148,11 @@ const deleteCart = async (req, res, next) => {
       });
     }
 
-    // Update the cart items and recalculate total price
+   
     cart.items = updatedItems;
-    await cart.calculateTotalPrice(); // Ensure this function exists and works properly
+    await cart.calculateTotalPrice(); 
 
-    // Save the updated cart
+   
     await cart.save();
 
     res.status(200).json({
@@ -213,17 +211,17 @@ const getCart = async (req, res, next) => {
 const updateCart = async(req,res,next)=>{
 try{
  
-  console.log("home")
+
 
   const userId = req.user.id
 
   const {productId,quantity} = req.body
 
 
-  //findin the cart of the user with the userId
+  
   const cart = await Cart.findOne({userId}) 
 
-   console.log(cart)
+  
 
    if(!cart){
 
@@ -234,11 +232,10 @@ try{
     })
   }
 
-  //  finding the productId from the cart that need to be updated. below code checks if the productId received from the frontend matches the productId that is in the cart .if it is true that index of the item will be stored in the itemIndex variable
   
    const itemIndex = cart.items.findIndex(item => item.productId.toString() === productId) 
 
-  //findIndex return -1 if no items satifies the condition if it is -1 then that means no product in the cart which matches the productId from the fronend
+  
   if (itemIndex === -1) {
     return res.status(404).json({
       message: "Product not found in cart",

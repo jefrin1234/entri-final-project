@@ -4,6 +4,7 @@ const Product = require('../../model/productModel');
 const Cart = require('../../model/cartModel');
 const Order = require('../../model/orderModel');
 const Sales = require('../../model/salesModel');
+const { logOut } = require('../../controllers/ADMIN/adminAuthControllers');
 const router = express.Router()
 const stripe = require("stripe")(process.env.Stripe_Private_Api_Key);
 
@@ -16,7 +17,6 @@ router.post('/create-checkout-session', userAuth, async (req, res, next) => {
 
     const { items, address, totalPrice, shipping_rate } = req.body
    
-    console.log(shipping_rate,"[[[[[[]]]]")
    
     const lineItems = items.map(item => ({
       price_data: {
@@ -49,8 +49,8 @@ router.post('/create-checkout-session', userAuth, async (req, res, next) => {
       line_items: lineItems,
       customer_email: address.emailAddress,
       mode: 'payment',
-      success_url:  `https://entri-final-project-user-page.vercel.app/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `https://entri-final-project-user-page.vercel.app/failure`,
+      success_url:  `https://entri-final-project-user-page.vercel.app/?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `https://entri-final-project-user-page.vercel.app//failure`,
       metadata: {
         userId: userId, 
         totalPrice: totalPrice,
@@ -114,7 +114,6 @@ router.post("/payment-success", userAuth, async (req, res, next) => {
     const trimmedSessionId = sessionId.trim();
     const order = await Order.findOne({ sessionId: trimmedSessionId });
 
-    
 
     if (order) {
       order.paymentStatus = session.payment_status; 
@@ -130,7 +129,7 @@ router.post("/payment-success", userAuth, async (req, res, next) => {
 
     if (session.payment_status === 'paid') {
        productsToRemove = order.items.map(item => item.productId.toString()); // 
-
+      
     
     }
 
@@ -145,8 +144,10 @@ router.post("/payment-success", userAuth, async (req, res, next) => {
 
       const updatedItems = cart.items.filter(item => !item.productId.equals(productId));
 
+     
+
       if (updatedItems.length === cart.items.length) {
-        console.log("Product not found in cart");
+     
         continue;
       }
 
@@ -157,7 +158,7 @@ router.post("/payment-success", userAuth, async (req, res, next) => {
      
       await cart.save();
 
-
+   
 
     }
 
@@ -186,12 +187,15 @@ router.post("/payment-success", userAuth, async (req, res, next) => {
     for (let item of items) {
     
       const product = await Product.findById(item.productId);
+
+      
     
       if (product) {
         const saleData = new Sales({
           productId: item.productId,
           sellerId: product.sellerId, 
           userId:userId,
+          images:product.images[0],
           quantity: item.quantity,
           saleAmount: item.quantity * item.price,
           dateOfSale: new Date(),
@@ -199,7 +203,7 @@ router.post("/payment-success", userAuth, async (req, res, next) => {
     
         try {
           await saleData.save(); 
-          console.log("Sale record created:", saleData); 
+         
         } catch (error) {
           console.error("Error saving sale record:", error);
         }
@@ -207,11 +211,9 @@ router.post("/payment-success", userAuth, async (req, res, next) => {
         console.log(`Product with ID ${item.productId} not found.`);
       }
     }
-    
 
 
-   
-  
+
     res.json({
       message: "payment is successfull",
       error: false,

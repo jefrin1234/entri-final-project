@@ -1,8 +1,8 @@
-const mongoose = require('mongoose') //importing mongoose
+const mongoose = require('mongoose') 
 
 const ConnectDB = async()=>{
   try{
-    await mongoose.connect(process.env.MONGO_URL) // connecting  with the database
+    await mongoose.connect(process.env.MONGO_URL) 
   console.log("connected")
   }catch(error){
     console.log(error)

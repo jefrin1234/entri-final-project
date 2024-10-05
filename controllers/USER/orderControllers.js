@@ -5,15 +5,15 @@ const allOrders = async (req, res, next) => {
   try {
     const { sortBy, sortOrder, orderStatus, paymentMethod } = req.query;
 
-    // Construct sort object based on the sortField and sortOrder
+ 
     let sort = {};
     if (sortBy === 'totalPrice') {
-      sort.totalPrice = sortOrder === 'asc' ? 1 : -1; // Ascending or Descending based on sortOrder
+      sort.totalPrice = sortOrder === 'asc' ? 1 : -1;
     } else if (sortBy === 'createdAt') {
-      sort.createdAt = sortOrder === 'asc' ? 1 : -1; // Sorting by createdAt as a fallback
+      sort.createdAt = sortOrder === 'asc' ? 1 : -1; 
     }
 
-    // Construct filter object based on orderStatus and paymentMethod
+  
     let filter = {};
     if (orderStatus) {
       filter.orderStatus = orderStatus;
@@ -22,14 +22,14 @@ const allOrders = async (req, res, next) => {
       filter.paymentMethod = paymentMethod;
     }
 
-    // Fetch orders based on filter and sort options
+   
     const orders = await Order.find(filter)
       .populate({ path: 'items.productId' })
       .populate({ path: 'items.sellerId', select: 'businessName' })
       .sort(sort)
       .lean();
 
-    res.status(200).json({ data: orders }); // Ensure response matches frontend expectations
+    res.status(200).json({ data: orders });
   } catch (error) {
     next(error);
   }
@@ -42,14 +42,13 @@ const allOrders = async (req, res, next) => {
 const sellerOrders = async (req, res, next) => {
   try {
 
-     console.log("herrrrrrrrrr")
-     const sellerId = req.params.sellerId || req.
-     console.log(sellerId,"//////////")
-     console.log(req.params.sellerId)
+   
+     const sellerId = req.params.sellerId 
+     
 
     const orders = await Order.find().populate({
       path: 'items.productId',
-      match: { sellerId: sellerId }, // Only get products belonging to this seller
+      match: { sellerId: sellerId },
     }).exec();
 
 
@@ -68,7 +67,7 @@ const sellerOrders = async (req, res, next) => {
       order.items.some(item => item.productId) 
     );
 
-   // console.log(filteredOrders,"77777777777")
+  
 
     res.status(200).json({
       message: 'Seller orders',
@@ -86,20 +85,20 @@ const userOrders = async (req, res, next) => {
   try {
     const userId = req.user.id;
 
-    // Find orders, populate 'productId', sort by 'createdAt' in descending order, and filter out unpaid card payments
+ 
     const orders = await Order.find({
       userId,
       $nor: [
-        { paymentStatus: 'unpaid', paymentMethod: 'card' }, // Exclude orders with both 'unpaid' and 'card' payment method
+        { paymentStatus: 'unpaid', paymentMethod: 'card' }, 
       ],
     })
       .populate({
         path: 'items.productId',
-        model: 'Product', // Adjust 'Product' to match your actual product model name
+        model: 'Product', 
       })
-      .sort({ createdAt: -1 }); // Sort orders by 'createdAt' in descending order
+      .sort({ createdAt: -1 }); 
 
-    if (!orders || orders.length === 0) { // Checking if there are no orders
+    if (!orders ) { 
       return res.status(404).json({
         message: "User orders not found",
         error: true,
@@ -124,8 +123,7 @@ const userOrders = async (req, res, next) => {
 const updateProductStatus = async (req, res, next) => {
   try {
 
-    console.log("caaan")
-
+    
     const { orderId, itemId, newStatus } = req.body; 
 
      const sellerId = req.seller.id;

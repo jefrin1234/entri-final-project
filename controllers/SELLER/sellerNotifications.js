@@ -4,14 +4,14 @@ const Notification = require("../../model/notificationModel")
 const getSellerNotifications = async(req,res,next)=>{
 
 try {
-  console.log("hereeee")
+
   const sellerId = req.seller.id
-  console.log(sellerId)
+ 
 
   const notifications = await Notification.find({receiverId:sellerId,deleted: false
   })
 
-  console.log(notifications,"eeeee")
+ 
 
   if(!notifications){
    
@@ -99,7 +99,7 @@ try {
 
 const updateNotification = async (req, res) => {
   try {
-    console.log("hiite")
+  
     const notificationId = req.params.notificationId;
     const newData = req.body;
 

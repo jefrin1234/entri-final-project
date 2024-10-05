@@ -9,10 +9,9 @@ try{
 
   const {fullName,phoneNumber,emailAddress,streetAddress,city,state,postalCode} = req.body
 
-  console.log(req.body)
-
+ 
   if(!fullName || !phoneNumber || !emailAddress || !streetAddress || !city || !state || !postalCode ){
-   console.log("error")
+   
     return res.status(409).json({
       message:"All fields are required",
       error:true,
@@ -29,7 +28,7 @@ try{
 
     await newAddress.save()
 
-    console.log(newAddress,"saved")
+  
 
   res.status(201).json({
     message:"new address added",
@@ -53,7 +52,7 @@ try{
 const deleteAddress = async(req,res,next)=>{
 
 try{
- console.log("iamm ")
+
   const userId = req.user.id
   
   const {addressId} = req.body
@@ -95,11 +94,11 @@ const getAddress = async(req,res,next)=>{
 
 try{
   const userId = req.user.id
-  console.log("lskfnsa",userId)
+ 
 
   const address = await Address.find({userId})
 
-  console.log(address)
+
 
   if(!address || address.length === 0){
     return res.status(404).json({
@@ -140,7 +139,7 @@ const addressById = async(req,res,next)=>{
 
    const address  = await Address.findById(addressId)
 
-   console.log(address)
+
 
   if(!address){
     return res.status(404).json({

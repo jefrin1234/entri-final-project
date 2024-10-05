@@ -155,7 +155,7 @@ const verifySeller = async (req, res, next) => {
     );
 
   } catch (error) {
-    console.log(error)
+ 
     return res.status(500).json({
       message: "Failed to verify seller. Email not sent.",
       error: true,
@@ -222,13 +222,13 @@ const SellerLogin = async (req, res, next) => {
 
     const sellerToken = createSellerToken(existingUser._id, "seller");
 
-   
-    res.cookie("sellerToken", sellerToken ,{
+ 
+
+    res.cookie("sellerToken", sellerToken   ,{
       httpOnly: true,
       secure: true, 
       sameSite: 'None'
-    }
-)
+    })
 
     res.status(200).json({ success: true,data:{id:existingUser._id,roles:existingUser.roles}, message: "Seller login successfull" });
 
@@ -306,9 +306,9 @@ const checkSeller = async (req, res, next) => {
 const sellerLogout = async (req, res, next) => {
   try {
 
-  
+   
 
-      res.clearCookie("sellerToken"  , {
+      res.clearCookie("sellerToken" , {
         httpOnly: true,
         secure: true, 
         sameSite: "None",

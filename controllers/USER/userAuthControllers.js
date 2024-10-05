@@ -4,6 +4,7 @@ const { createToken, createUserToken } = require('../../utils/createToken');
 
 
 const Rating = require('../../model/ratingModel');
+const Admin = require('../../model/adminModel');
 
 
 
@@ -50,11 +51,15 @@ const login = async (req, res, next) => {
     
 
 
-    res.cookie("Token", token,{
+    res.cookie("Token",token,{
       httpOnly: true,
       secure: true, 
       sameSite: 'None' 
     })
+
+    
+
+
     res.status(200).json({ success: true,data:{_id:existingUser._id}, message: "user login successfull" });
 
 
@@ -157,7 +162,7 @@ const userProfile = async (req, res, next) => {
 const userLogout = async (req, res, next) => {
   try {
     
-
+   
    
    
     res.clearCookie("Token" ,{
@@ -191,14 +196,15 @@ const checkUser = async (req, res, next) => {
   }
 };
 
-const updateUserRole = async (req, res,next) => {
+const updateUserRole = async (req, res, next) => {
   try {
- 
-  
-    const userId = req.params.userId
-   
+    
+    const userId = req.params.userId;
+
     let user = await User.findOne({ _id: userId });
 
+
+   
     if (!user) {
       return res.status(404).json({
         message: "User not found",
@@ -207,59 +213,65 @@ const updateUserRole = async (req, res,next) => {
       });
     }
 
+   
     if (!user.role.includes('admin')) {
-      user.role.push('admin')
+      user.role.push('admin');
+
+
+      
+      const newAdmin = new Admin({
+        email: user.email,
+        password: user.password, 
+      });
+      await newAdmin.save();
+     
     }
 
-  
     await user.save();
-
-  
 
 
 
     res.status(200).json({
       message: "User role updated",
       error: false,
-      success: true,
-     
+      success: true
     });
   } catch (error) {
-    
-    next(error)
+
+    next(error);
   }
 };
 
 
+
 const passwordChange = async(req,res,next)=>{
   const { currentPassword, newPassword } = req.body;
-  console.log(currentPassword,newPassword)
-  const userId = req.user.id; // Assuming you're using authentication middleware
-  console.log(userId,"fffff")
+
+  const userId = req.user.id;
+
   try {
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    console.log(user)
-    // Check if the current password is correct
+
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ success: false, message: 'Current password is incorrect' });
     }
 
-    // Hash the new password
+   
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    // Update the user's password
+   
     user.password = hashedPassword;
     await user.save();
 
     res.json({ success: true, message: 'Password updated successfully' });
   } catch (err) {
-    console.error('Error updating password:', err);
+  
     res.status(500).json({ success: false, message: 'Server error' });
   }
 }

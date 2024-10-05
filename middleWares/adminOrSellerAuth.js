@@ -4,7 +4,7 @@
 const jwt = require("jsonwebtoken");
 
 const adminOrSellerAuth = (req, res, next) => {
-  console.log("hittin iam jhere")
+
   const adminToken = req.cookies.adminToken;
   const sellerToken = req.cookies.sellerToken;
 

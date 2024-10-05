@@ -33,7 +33,7 @@ const adminAuth = (req, res, next) => {
 
 
     req.admin = verifyToken; 
-    console.log(req.admin,"xxxxxxxxxxx")
+  
     next();
   } catch (error) {
     next(error);
